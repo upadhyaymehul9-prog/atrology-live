@@ -16,17 +16,17 @@ import { HouseInfoModal } from './HouseInfoModal';
  */
 const HOUSE_CENTERS: Record<number, { x: number; y: number }> = {
   1: { x: 210, y: 123 }, // top centre diamond
-  2: { x: 123, y: 65 }, // top-left corner
-  3: { x: 123, y: 181 }, // left upper side
+  2: { x: 123, y: 65 }, // top-left corner triangle
+  3: { x: 65, y: 123 }, // left upper triangle
   4: { x: 123, y: 210 }, // left centre diamond
-  5: { x: 123, y: 239 }, // left lower side
-  6: { x: 123, y: 355 }, // bottom-left corner
+  5: { x: 65, y: 297 }, // left lower triangle
+  6: { x: 123, y: 355 }, // bottom-left corner triangle
   7: { x: 210, y: 297 }, // bottom centre diamond
-  8: { x: 297, y: 355 }, // bottom-right corner
-  9: { x: 297, y: 239 }, // right lower side
+  8: { x: 297, y: 355 }, // bottom-right corner triangle
+  9: { x: 355, y: 297 }, // right lower triangle
   10: { x: 297, y: 210 }, // right centre diamond
-  11: { x: 297, y: 181 }, // right upper side
-  12: { x: 297, y: 65 }, // top-right corner
+  11: { x: 355, y: 123 }, // right upper triangle
+  12: { x: 297, y: 65 }, // top-right corner triangle
 };
 
 interface HouseData {
@@ -100,14 +100,14 @@ export function KundliChart({ chart, name }: KundliChartProps) {
             filter="url(#kundli-shadow)"
           />
 
-          {/* Red North Indian lines */}
+          {/* Red North Indian lines: outer square + diagonals + rhombus joining side midpoints */}
           <rect x={gx} y={gy} width={gs} height={gs} fill="#fff9f0" stroke="#b91c1c" strokeWidth="2" />
           <line x1={gx} y1={gy} x2={gx + gs} y2={gy + gs} stroke="#b91c1c" strokeWidth="1.4" />
           <line x1={gx + gs} y1={gy} x2={gx} y2={gy + gs} stroke="#b91c1c" strokeWidth="1.4" />
-          <line x1={gm} y1={gy} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
-          <line x1={gx + gs} y1={gm} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
-          <line x1={gm} y1={gy + gs} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
-          <line x1={gx} y1={gm} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gm} y1={gy} x2={gx} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gm} y1={gy} x2={gx + gs} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gm} y1={gy + gs} x2={gx} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gm} y1={gy + gs} x2={gx + gs} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
 
           {/* Lagna */}
           <text x={gm} y={gy - 10} textAnchor="middle" className="k-lagna-mark">
