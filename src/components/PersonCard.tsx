@@ -26,7 +26,7 @@ export function PersonCard({
   isSelected,
   onToggleSelect,
 }: PersonCardProps) {
-  const [showKundli, setShowKundli] = useState(true);
+  const [showKundli, setShowKundli] = useState(false);
   const [selectedYoga, setSelectedYoga] = useState<YogaResult | null>(null);
 
   const visibleYogas =
