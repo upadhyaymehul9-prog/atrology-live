@@ -10,11 +10,12 @@ import {
   importData,
   loadPersons,
 } from './lib/storage';
+import { CalendarView } from './components/CalendarView';
 import { YogaInfoModal } from './components/YogaInfoModal';
 import { getYogaCatalog, YOGA_RULES } from './lib/yogas';
 import type { Person, YogaId, YogaResult } from './types';
 
-type View = 'list' | 'add' | 'edit' | 'yoga-info';
+type View = 'list' | 'add' | 'edit' | 'yoga-info' | 'calendar';
 
 export function App() {
   const [persons, setPersons] = useState<Person[]>(() => loadPersons());
@@ -113,7 +114,7 @@ export function App() {
         const text = await file.text();
         const count = importData(text);
         refresh();
-        alert(`Imported ${count} yajmaan successfully.`);
+        alert(`Imported ${count.persons} yajmaan and ${count.events} schedule items.`);
       } catch {
         alert('Failed to import. Please check the file format.');
       }
@@ -149,6 +150,13 @@ export function App() {
             onClick={() => setView('list')}
           >
             Yajmaan ({persons.length})
+          </button>
+          <button
+            type="button"
+            className={view === 'calendar' ? 'active' : ''}
+            onClick={() => setView('calendar')}
+          >
+            📅 Calendar
           </button>
           <button
             type="button"
@@ -232,6 +240,8 @@ export function App() {
         )}
 
         {view === 'yoga-info' && <YogaInfoPanel />}
+
+        {view === 'calendar' && <CalendarView />}
       </main>
 
       <footer className="footer">

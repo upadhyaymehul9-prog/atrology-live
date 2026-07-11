@@ -77,11 +77,20 @@ body {
   gap: 8px;
   margin-top: 12px;
   padding-bottom: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-tabs button {
   flex: 1;
-  padding: 10px;
+  min-width: max-content;
+  padding: 10px 12px;
+  white-space: nowrap;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
@@ -1013,4 +1022,239 @@ body {
 
 .planet-table tr:nth-child(even) td {
   background: rgba(255, 255, 255, 0.02);
+}
+
+/* Calendar */
+.calendar-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cal-header h2 {
+  color: var(--accent-soft);
+  font-size: 1.2rem;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cal-month-label {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--accent-soft);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 4px;
+}
+
+.cal-day.empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.cal-day.today {
+  border-color: var(--accent);
+}
+
+.cal-day.selected {
+  background: rgba(201, 162, 39, 0.2);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+.cal-day.has-events .cal-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--success);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+}
+
+.cal-day-num {
+  line-height: 1;
+}
+
+.cal-day-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.cal-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cal-day-header h3 {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.cal-empty {
+  text-align: center;
+  padding: 24px 12px;
+  color: var(--text-muted);
+}
+
+.cal-empty .btn {
+  margin-top: 12px;
+}
+
+.cal-event-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cal-event {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--border);
+}
+
+.cal-event.type-meeting {
+  border-left-color: #4dabf7;
+}
+
+.cal-event.type-work {
+  border-left-color: #ffa94d;
+}
+
+.cal-event.type-personal {
+  border-left-color: #69db7c;
+}
+
+.cal-event.type-puja {
+  border-left-color: var(--accent);
+}
+
+.cal-event.type-all-day {
+  border-left-color: #da77f2;
+}
+
+.cal-event-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.cal-event-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cal-event-body strong {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.cal-event-time {
+  font-size: 0.85rem;
+  color: var(--accent-soft);
+  font-weight: 600;
+}
+
+.cal-event-type {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cal-event-yajmaan {
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.cal-event-notes {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.cal-event-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.event-form-modal {
+  max-height: 90vh;
+}
+
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.event-form input,
+.event-form select,
+.event-form textarea {
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 1rem;
 }

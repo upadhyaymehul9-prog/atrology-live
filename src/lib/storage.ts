@@ -5,6 +5,7 @@ import {
   splitLegacyPhone,
 } from '../data/countryCodes';
 import type { Person, PersonWithYogas } from '../types';
+import { loadEvents, saveEvents } from './calendarStorage';
 import { computeBirthChart } from './ephemeris';
 import { detectYogas } from './yogas';
 
@@ -93,14 +94,37 @@ export function enrichAll(persons: Person[]): PersonWithYogas[] {
 }
 
 export function exportData(): string {
-  return JSON.stringify(loadPersons(), null, 2);
+  return JSON.stringify(
+    {
+      version: 2,
+      persons: loadPersons(),
+      events: loadEvents(),
+      exportedAt: new Date().toISOString(),
+    },
+    null,
+    2,
+  );
 }
 
-export function importData(json: string): number {
-  const parsed = JSON.parse(json) as StoredPerson[];
-  if (!Array.isArray(parsed)) throw new Error('Invalid backup file');
-  savePersons(parsed.map(normalizePerson));
-  return parsed.length;
+export function importData(json: string): { persons: number; events: number } {
+  const parsed = JSON.parse(json) as
+    | StoredPerson[]
+    | { persons?: StoredPerson[]; events?: import('../types/schedule').ScheduleEvent[] };
+
+  if (Array.isArray(parsed)) {
+    savePersons(parsed.map(normalizePerson));
+    return { persons: parsed.length, events: 0 };
+  }
+
+  if (parsed.persons && Array.isArray(parsed.persons)) {
+    savePersons(parsed.persons.map(normalizePerson));
+    if (parsed.events && Array.isArray(parsed.events)) {
+      saveEvents(parsed.events);
+    }
+    return { persons: parsed.persons.length, events: parsed.events?.length ?? 0 };
+  }
+
+  throw new Error('Invalid backup file');
 }
 
 export function getWhatsAppNumber(person: Person): string {
