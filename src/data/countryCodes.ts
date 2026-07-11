@@ -1,0 +1,175 @@
+export interface CountryCode {
+  code: string;
+  name: string;
+  flag: string;
+}
+
+/** ITU calling codes for all countries — searchable in the form */
+export const COUNTRY_CODES: CountryCode[] = [
+  { code: '93', name: 'Afghanistan', flag: '🇦🇫' },
+  { code: '355', name: 'Albania', flag: '🇦🇱' },
+  { code: '213', name: 'Algeria', flag: '🇩🇿' },
+  { code: '376', name: 'Andorra', flag: '🇦🇩' },
+  { code: '244', name: 'Angola', flag: '🇦🇴' },
+  { code: '54', name: 'Argentina', flag: '🇦🇷' },
+  { code: '374', name: 'Armenia', flag: '🇦🇲' },
+  { code: '61', name: 'Australia', flag: '🇦🇺' },
+  { code: '43', name: 'Austria', flag: '🇦🇹' },
+  { code: '994', name: 'Azerbaijan', flag: '🇦🇿' },
+  { code: '973', name: 'Bahrain', flag: '🇧🇭' },
+  { code: '880', name: 'Bangladesh', flag: '🇧🇩' },
+  { code: '375', name: 'Belarus', flag: '🇧🇾' },
+  { code: '32', name: 'Belgium', flag: '🇧🇪' },
+  { code: '501', name: 'Belize', flag: '🇧🇿' },
+  { code: '975', name: 'Bhutan', flag: '🇧🇹' },
+  { code: '591', name: 'Bolivia', flag: '🇧🇴' },
+  { code: '387', name: 'Bosnia', flag: '🇧🇦' },
+  { code: '267', name: 'Botswana', flag: '🇧🇼' },
+  { code: '55', name: 'Brazil', flag: '🇧🇷' },
+  { code: '673', name: 'Brunei', flag: '🇧🇳' },
+  { code: '359', name: 'Bulgaria', flag: '🇧🇬' },
+  { code: '855', name: 'Cambodia', flag: '🇰🇭' },
+  { code: '237', name: 'Cameroon', flag: '🇨🇲' },
+  { code: '1', name: 'Canada / USA', flag: '🇺🇸' },
+  { code: '56', name: 'Chile', flag: '🇨🇱' },
+  { code: '86', name: 'China', flag: '🇨🇳' },
+  { code: '57', name: 'Colombia', flag: '🇨🇴' },
+  { code: '506', name: 'Costa Rica', flag: '🇨🇷' },
+  { code: '385', name: 'Croatia', flag: '🇭🇷' },
+  { code: '53', name: 'Cuba', flag: '🇨🇺' },
+  { code: '357', name: 'Cyprus', flag: '🇨🇾' },
+  { code: '420', name: 'Czech Republic', flag: '🇨🇿' },
+  { code: '45', name: 'Denmark', flag: '🇩🇰' },
+  { code: '593', name: 'Ecuador', flag: '🇪🇨' },
+  { code: '20', name: 'Egypt', flag: '🇪🇬' },
+  { code: '503', name: 'El Salvador', flag: '🇸🇻' },
+  { code: '372', name: 'Estonia', flag: '🇪🇪' },
+  { code: '251', name: 'Ethiopia', flag: '🇪🇹' },
+  { code: '358', name: 'Finland', flag: '🇫🇮' },
+  { code: '33', name: 'France', flag: '🇫🇷' },
+  { code: '995', name: 'Georgia', flag: '🇬🇪' },
+  { code: '49', name: 'Germany', flag: '🇩🇪' },
+  { code: '233', name: 'Ghana', flag: '🇬🇭' },
+  { code: '30', name: 'Greece', flag: '🇬🇷' },
+  { code: '502', name: 'Guatemala', flag: '🇬🇹' },
+  { code: '852', name: 'Hong Kong', flag: '🇭🇰' },
+  { code: '36', name: 'Hungary', flag: '🇭🇺' },
+  { code: '354', name: 'Iceland', flag: '🇮🇸' },
+  { code: '91', name: 'India', flag: '🇮🇳' },
+  { code: '62', name: 'Indonesia', flag: '🇮🇩' },
+  { code: '98', name: 'Iran', flag: '🇮🇷' },
+  { code: '964', name: 'Iraq', flag: '🇮🇶' },
+  { code: '353', name: 'Ireland', flag: '🇮🇪' },
+  { code: '972', name: 'Israel', flag: '🇮🇱' },
+  { code: '39', name: 'Italy', flag: '🇮🇹' },
+  { code: '225', name: 'Ivory Coast', flag: '🇨🇮' },
+  { code: '81', name: 'Japan', flag: '🇯🇵' },
+  { code: '962', name: 'Jordan', flag: '🇯🇴' },
+  { code: '7', name: 'Kazakhstan / Russia', flag: '🇰🇿' },
+  { code: '254', name: 'Kenya', flag: '🇰🇪' },
+  { code: '965', name: 'Kuwait', flag: '🇰🇼' },
+  { code: '996', name: 'Kyrgyzstan', flag: '🇰🇬' },
+  { code: '856', name: 'Laos', flag: '🇱🇦' },
+  { code: '371', name: 'Latvia', flag: '🇱🇻' },
+  { code: '961', name: 'Lebanon', flag: '🇱🇧' },
+  { code: '370', name: 'Lithuania', flag: '🇱🇹' },
+  { code: '352', name: 'Luxembourg', flag: '🇱🇺' },
+  { code: '853', name: 'Macau', flag: '🇲🇴' },
+  { code: '60', name: 'Malaysia', flag: '🇲🇾' },
+  { code: '960', name: 'Maldives', flag: '🇲🇻' },
+  { code: '356', name: 'Malta', flag: '🇲🇹' },
+  { code: '52', name: 'Mexico', flag: '🇲🇽' },
+  { code: '373', name: 'Moldova', flag: '🇲🇩' },
+  { code: '377', name: 'Monaco', flag: '🇲🇨' },
+  { code: '976', name: 'Mongolia', flag: '🇲🇳' },
+  { code: '382', name: 'Montenegro', flag: '🇲🇪' },
+  { code: '212', name: 'Morocco', flag: '🇲🇦' },
+  { code: '95', name: 'Myanmar', flag: '🇲🇲' },
+  { code: '977', name: 'Nepal', flag: '🇳🇵' },
+  { code: '31', name: 'Netherlands', flag: '🇳🇱' },
+  { code: '64', name: 'New Zealand', flag: '🇳🇿' },
+  { code: '234', name: 'Nigeria', flag: '🇳🇬' },
+  { code: '47', name: 'Norway', flag: '🇳🇴' },
+  { code: '968', name: 'Oman', flag: '🇴🇲' },
+  { code: '92', name: 'Pakistan', flag: '🇵🇰' },
+  { code: '507', name: 'Panama', flag: '🇵🇦' },
+  { code: '595', name: 'Paraguay', flag: '🇵🇾' },
+  { code: '51', name: 'Peru', flag: '🇵🇪' },
+  { code: '63', name: 'Philippines', flag: '🇵🇭' },
+  { code: '48', name: 'Poland', flag: '🇵🇱' },
+  { code: '351', name: 'Portugal', flag: '🇵🇹' },
+  { code: '974', name: 'Qatar', flag: '🇶🇦' },
+  { code: '40', name: 'Romania', flag: '🇷🇴' },
+  { code: '7', name: 'Russia', flag: '🇷🇺' },
+  { code: '966', name: 'Saudi Arabia', flag: '🇸🇦' },
+  { code: '381', name: 'Serbia', flag: '🇷🇸' },
+  { code: '65', name: 'Singapore', flag: '🇸🇬' },
+  { code: '421', name: 'Slovakia', flag: '🇸🇰' },
+  { code: '386', name: 'Slovenia', flag: '🇸🇮' },
+  { code: '27', name: 'South Africa', flag: '🇿🇦' },
+  { code: '82', name: 'South Korea', flag: '🇰🇷' },
+  { code: '34', name: 'Spain', flag: '🇪🇸' },
+  { code: '94', name: 'Sri Lanka', flag: '🇱🇰' },
+  { code: '249', name: 'Sudan', flag: '🇸🇩' },
+  { code: '46', name: 'Sweden', flag: '🇸🇪' },
+  { code: '41', name: 'Switzerland', flag: '🇨🇭' },
+  { code: '963', name: 'Syria', flag: '🇸🇾' },
+  { code: '886', name: 'Taiwan', flag: '🇹🇼' },
+  { code: '992', name: 'Tajikistan', flag: '🇹🇯' },
+  { code: '255', name: 'Tanzania', flag: '🇹🇿' },
+  { code: '66', name: 'Thailand', flag: '🇹🇭' },
+  { code: '216', name: 'Tunisia', flag: '🇹🇳' },
+  { code: '90', name: 'Turkey', flag: '🇹🇷' },
+  { code: '993', name: 'Turkmenistan', flag: '🇹🇲' },
+  { code: '256', name: 'Uganda', flag: '🇺🇬' },
+  { code: '380', name: 'Ukraine', flag: '🇺🇦' },
+  { code: '971', name: 'UAE', flag: '🇦🇪' },
+  { code: '44', name: 'United Kingdom', flag: '🇬🇧' },
+  { code: '1', name: 'United States', flag: '🇺🇸' },
+  { code: '598', name: 'Uruguay', flag: '🇺🇾' },
+  { code: '998', name: 'Uzbekistan', flag: '🇺🇿' },
+  { code: '58', name: 'Venezuela', flag: '🇻🇪' },
+  { code: '84', name: 'Vietnam', flag: '🇻🇳' },
+  { code: '967', name: 'Yemen', flag: '🇾🇪' },
+  { code: '260', name: 'Zambia', flag: '🇿🇲' },
+  { code: '263', name: 'Zimbabwe', flag: '🇿🇼' },
+].sort((a, b) => a.name.localeCompare(b.name));
+
+export const DEFAULT_COUNTRY_CODE = '91';
+
+export function searchCountries(query: string): CountryCode[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return COUNTRY_CODES;
+  return COUNTRY_CODES.filter(
+    (c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.code.includes(q) ||
+      `+${c.code}`.includes(q),
+  );
+}
+
+export function splitLegacyPhone(fullPhone: string): { countryCode: string; phone: string } {
+  const digits = fullPhone.replace(/\D/g, '');
+  if (!digits) return { countryCode: DEFAULT_COUNTRY_CODE, phone: '' };
+
+  const codes = [...new Set(COUNTRY_CODES.map((c) => c.code))].sort(
+    (a, b) => b.length - a.length,
+  );
+
+  for (const code of codes) {
+    if (digits.startsWith(code) && digits.length > code.length + 5) {
+      return { countryCode: code, phone: digits.slice(code.length) };
+    }
+  }
+
+  if (digits.length === 10) return { countryCode: DEFAULT_COUNTRY_CODE, phone: digits };
+  return { countryCode: DEFAULT_COUNTRY_CODE, phone: digits };
+}
+
+export function fullPhoneNumber(countryCode: string, phone: string): string {
+  return `${countryCode.replace(/\D/g, '')}${phone.replace(/\D/g, '')}`;
+}
+
+export function formatDisplayPhone(countryCode: string, phone: string): string {
+  return `+${countryCode} ${phone.replace(/\D/g, '')}`;
+}
