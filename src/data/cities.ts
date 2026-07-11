@@ -1,0 +1,23 @@
+/** Popular Indian cities with coordinates for quick birth-place selection */
+export const INDIAN_CITIES = [
+  { name: 'Mumbai', lat: 19.076, lng: 72.8777 },
+  { name: 'Delhi', lat: 28.6139, lng: 77.209 },
+  { name: 'Bangalore', lat: 12.9716, lng: 77.5946 },
+  { name: 'Hyderabad', lat: 17.385, lng: 78.4867 },
+  { name: 'Chennai', lat: 13.0827, lng: 80.2707 },
+  { name: 'Kolkata', lat: 22.5726, lng: 88.3639 },
+  { name: 'Pune', lat: 18.5204, lng: 73.8567 },
+  { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714 },
+  { name: 'Jaipur', lat: 26.9124, lng: 75.7873 },
+  { name: 'Lucknow', lat: 26.8467, lng: 80.9462 },
+  { name: 'Varanasi', lat: 25.3176, lng: 82.9739 },
+  { name: 'Ujjain', lat: 23.1765, lng: 75.7885 },
+  { name: 'Haridwar', lat: 29.9457, lng: 78.1642 },
+  { name: 'Nashik', lat: 19.9975, lng: 73.7898 },
+  { name: 'Indore', lat: 22.7196, lng: 75.8577 },
+  { name: 'Bhopal', lat: 23.2599, lng: 77.4126 },
+  { name: 'Patna', lat: 25.5941, lng: 85.1376 },
+  { name: 'Chandigarh', lat: 30.7333, lng: 76.7794 },
+  { name: 'Surat', lat: 21.1702, lng: 72.8311 },
+  { name: 'Coimbatore', lat: 11.0168, lng: 76.9558 },
+] as const;
