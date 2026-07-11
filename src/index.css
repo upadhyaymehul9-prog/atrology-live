@@ -474,6 +474,24 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
+  width: 100%;
+  text-align: left;
+}
+
+.catalog-btn {
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+  color: inherit;
+  font: inherit;
+}
+
+.catalog-btn:hover {
+  border-color: var(--accent);
+  transform: scale(1.01);
+}
+
+.yoga-catalog li {
+  list-style: none;
 }
 
 .catalog-header {
@@ -625,87 +643,348 @@ body {
 }
 
 .kundli-title {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: var(--accent-soft);
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 600;
 }
 
-.kundli-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
-  background: var(--accent);
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  overflow: hidden;
+.kundli-diamond-frame {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #fff8e7 0%, #ffe4b5 50%, #ffd699 100%);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow:
+    0 0 0 3px #e8a020,
+    0 0 0 6px #c9a227,
+    0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-.kundli-cell {
-  background: var(--bg);
-  min-height: 72px;
-  padding: 6px;
+.kundli-lagna-badge {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #8b4513;
+  background: rgba(255, 255, 255, 0.85);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e8a020;
+}
+
+.kundli-diamond-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.kundli-house-btn {
+  position: absolute;
+  z-index: 2;
+  background: rgba(255, 252, 240, 0.88);
+  border: 1px solid rgba(201, 162, 39, 0.5);
+  border-radius: 6px;
+  padding: 4px 3px;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  position: relative;
+  align-items: center;
+  gap: 1px;
+  min-height: 52px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  color: #3d2914;
+  font-family: 'Noto Sans Gujarati', 'Segoe UI', sans-serif;
 }
 
-.kundli-cell.empty {
-  background: var(--bg-card);
-  opacity: 0.4;
+.kundli-house-btn:hover,
+.kundli-house-btn:focus {
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.5);
+  z-index: 3;
+  outline: none;
 }
 
-.kundli-cell.lagna-cell {
-  background: rgba(201, 162, 39, 0.12);
-  border: 1px solid rgba(201, 162, 39, 0.4);
+.kundli-house-btn.lagna-house {
+  background: rgba(255, 230, 150, 0.95);
+  border-color: #e8a020;
+  border-width: 2px;
 }
 
-.house-num {
-  font-size: 0.65rem;
-  color: var(--text-muted);
+.k-house-num {
+  font-size: 0.6rem;
+  color: #8b6914;
+  font-weight: 700;
   position: absolute;
-  top: 3px;
+  top: 2px;
   left: 4px;
 }
 
-.sign-label {
-  font-size: 0.75rem;
-  color: var(--accent);
-  font-weight: 600;
-  text-align: center;
-  margin-top: 2px;
+.k-sign {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b8860b;
+  margin-top: 8px;
 }
 
-.planet-list {
+.k-keywords {
+  font-size: 0.55rem;
+  color: #5c4033;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.k-planets {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 2px;
   justify-content: center;
   margin-top: auto;
 }
 
-.planet-tag {
-  font-size: 0.7rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1px 4px;
-  color: var(--text);
+.k-planet {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #8b0000;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+  padding: 0 2px;
 }
 
-.planet-tag sub {
-  font-size: 0.55rem;
+.k-planet sub {
+  font-size: 0.5rem;
+  color: #666;
+}
+
+.kundli-tap-hint,
+.yoga-tap-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 8px 0 4px;
+}
+
+.kundli-summary {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
-.kundli-legend {
+.summary-row {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 0.7rem;
+}
+
+.summary-row strong {
+  color: var(--accent-soft);
+}
+
+.planet-table-wrap {
+  margin-top: 12px;
+}
+
+.table-title {
+  font-size: 0.9rem;
+  color: var(--accent-soft);
+  margin-bottom: 8px;
+}
+
+.astro-depth {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.astro-depth h4 {
+  font-size: 0.85rem;
+  color: var(--accent-soft);
+  margin-bottom: 8px;
+}
+
+.astro-depth ul {
+  list-style: none;
+  font-size: 0.8rem;
   color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.astro-depth strong {
+  color: var(--text);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 12px 12px;
+  padding: 20px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow);
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--bg-elevated);
+  border: none;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.modal-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.severity-badge {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.severity-badge.severity-high {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ffb4b4;
+}
+
+.severity-badge.severity-medium {
+  background: rgba(255, 169, 77, 0.2);
+  color: #ffd8a8;
+}
+
+.severity-badge.severity-low {
+  background: rgba(105, 219, 124, 0.2);
+  color: #b2f2bb;
+}
+
+.modal-card h3 {
+  color: var(--accent-soft);
+  font-size: 1.1rem;
+  padding-right: 36px;
+}
+
+.modal-hi {
+  color: var(--accent);
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.modal-keywords {
+  color: var(--accent);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.modal-section {
+  margin-bottom: 14px;
+}
+
+.modal-section h4 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.modal-section p {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.modal-section.remedy {
+  background: rgba(201, 162, 39, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.modal-section.chart-detail ul {
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-ok {
+  width: 100%;
   margin-top: 8px;
-  line-height: 1.4;
+}
+
+.tag-btn {
+  cursor: pointer;
+  border: none;
+  font: inherit;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.tag-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tag-btn:active {
+  transform: scale(0.98);
+}
+
+.yoga-tags li {
+  list-style: none;
+}
+
+/* Remove old grid styles — replaced by diamond */
+.kundli-grid,
+.kundli-cell,
+.house-num,
+.sign-label,
+.planet-list,
+.planet-tag,
+.kundli-legend {
+  /* legacy — kept for safety */
 }
 
 .planet-table {

@@ -10,8 +10,9 @@ import {
   importData,
   loadPersons,
 } from './lib/storage';
-import { getYogaCatalog } from './lib/yogas';
-import type { Person, YogaId } from './types';
+import { YogaInfoModal } from './components/YogaInfoModal';
+import { getYogaCatalog, YOGA_RULES } from './lib/yogas';
+import type { Person, YogaId, YogaResult } from './types';
 
 type View = 'list' | 'add' | 'edit' | 'yoga-info';
 
@@ -243,25 +244,46 @@ export function App() {
 
 function YogaInfoPanel() {
   const catalog = getYogaCatalog();
+  const [selected, setSelected] = useState<YogaResult | null>(null);
+
+  const openYoga = (id: string) => {
+    const rule = YOGA_RULES.find((r) => r.id === id);
+    if (!rule) return;
+    setSelected({
+      id: rule.id,
+      name: rule.name,
+      nameHi: rule.nameHi,
+      category: rule.category,
+      severity: rule.severity,
+      present: false,
+      description: rule.description,
+      remedy: rule.remedy,
+    });
+  };
 
   return (
     <div className="yoga-info">
-      <h2>Supported Yogas & Doshas</h2>
-      <p className="hint">
-        Each yajmaan&apos;s chart is calculated using Lahiri ayanamsa and whole-sign houses.
-      </p>
+      <h2>Supported Yogas & Doshas (43)</h2>
+      <p className="hint">ટેપ કરો — અર્થ જાણો / Tap any item for meaning & remedy</p>
       <ul className="yoga-catalog">
         {catalog.map((y) => (
-          <li key={y.id} className={`catalog-item severity-${y.severity}`}>
-            <div className="catalog-header">
-              <strong>{y.name}</strong>
-              <span className="hi">{y.nameHi}</span>
-              <span className={`badge ${y.category}`}>{y.category}</span>
-            </div>
-            <p>{y.description}</p>
+          <li key={y.id}>
+            <button
+              type="button"
+              className={`catalog-item catalog-btn severity-${y.severity}`}
+              onClick={() => openYoga(y.id)}
+            >
+              <div className="catalog-header">
+                <strong>{y.nameHi || y.name}</strong>
+                <span className="hi">{y.name}</span>
+                <span className={`badge ${y.category}`}>{y.category === 'dosha' ? 'દોષ' : 'યોગ'}</span>
+              </div>
+              <p>{y.description.slice(0, 80)}…</p>
+            </button>
           </li>
         ))}
       </ul>
+      <YogaInfoModal yoga={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

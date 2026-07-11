@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { KundliChart, PlanetTable } from './KundliChart';
+import { YogaInfoModal } from './YogaInfoModal';
 import {
   buildWhatsAppUrl,
   buildYogaReminderMessage,
   deletePerson,
   displayPhone,
 } from '../lib/storage';
-import type { PersonWithYogas, YogaId } from '../types';
+import type { PersonWithYogas, YogaId, YogaResult } from '../types';
 
 interface PersonCardProps {
   person: PersonWithYogas;
@@ -26,6 +27,7 @@ export function PersonCard({
   onToggleSelect,
 }: PersonCardProps) {
   const [showKundli, setShowKundli] = useState(true);
+  const [selectedYoga, setSelectedYoga] = useState<YogaResult | null>(null);
 
   const visibleYogas =
     selectedYogaFilter === 'all'
@@ -76,27 +78,38 @@ export function PersonCard({
           className="kundli-toggle"
           onClick={() => setShowKundli((v) => !v)}
         >
-          {showKundli ? '▼ Hide Kundli' : '▶ Show Full Kundli'}
+          {showKundli ? '▼ કુંડળી છુપાવો' : '▶ પૂર્ણ કુંડળી જુઓ'}
         </button>
         {showKundli && (
           <>
-            <KundliChart chart={person.chart} compact />
+            <KundliChart chart={person.chart} name={person.name} />
             <PlanetTable chart={person.chart} />
           </>
         )}
       </div>
 
       {visibleYogas.length > 0 ? (
-        <ul className="yoga-tags">
-          {visibleYogas.map((y) => (
-            <li key={y.id} className={`tag severity-${y.severity}`} title={y.description}>
-              {y.name}
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="yoga-tap-hint">👆 દોષ/યોગ પર ટેપ કરો — અર્થ જાણો</p>
+          <ul className="yoga-tags">
+            {visibleYogas.map((y) => (
+              <li key={y.id}>
+                <button
+                  type="button"
+                  className={`tag tag-btn severity-${y.severity}`}
+                  onClick={() => setSelectedYoga(y)}
+                >
+                  {y.nameHi || y.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       ) : (
         <p className="no-yoga">No matching yogas for current filter</p>
       )}
+
+      <YogaInfoModal yoga={selectedYoga} onClose={() => setSelectedYoga(null)} />
 
       <div className="card-actions">
         <button type="button" className="btn whatsapp" onClick={sendWhatsApp}>

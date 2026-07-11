@@ -1,53 +1,51 @@
+import { useState } from 'react';
 import type { BirthChart, PlanetName } from '../types';
-import { SIGN_NAMES } from '../types';
+import {
+  getNakshatra,
+  HOUSE_INFO,
+  PLANET_GU,
+  PLANET_SHORT_GU,
+  SIGN_GU,
+  SIGN_GU_FULL,
+} from '../data/kundliGu';
+import { getHouseLord } from '../lib/ephemeris';
+import { HouseInfoModal } from './HouseInfoModal';
 
-const PLANET_SHORT: Record<PlanetName, string> = {
-  Sun: 'Su',
-  Moon: 'Mo',
-  Mars: 'Ma',
-  Mercury: 'Me',
-  Jupiter: 'Ju',
-  Venus: 'Ve',
-  Saturn: 'Sa',
-  Rahu: 'Ra',
-  Ketu: 'Ke',
+/** North Indian diamond — house positions (x%, y%) in SVG viewBox */
+const HOUSE_POSITIONS: Record<number, { x: number; y: number; w: number }> = {
+  1: { x: 50, y: 11, w: 88 },
+  2: { x: 22, y: 22, w: 78 },
+  3: { x: 10, y: 50, w: 78 },
+  4: { x: 22, y: 78, w: 78 },
+  5: { x: 50, y: 89, w: 88 },
+  6: { x: 78, y: 78, w: 78 },
+  7: { x: 90, y: 50, w: 78 },
+  8: { x: 78, y: 22, w: 78 },
+  9: { x: 38, y: 62, w: 72 },
+  10: { x: 62, y: 62, w: 72 },
+  11: { x: 38, y: 38, w: 72 },
+  12: { x: 62, y: 38, w: 72 },
 };
-
-const SIGN_SHORT = ['Ar', 'Ta', 'Ge', 'Cn', 'Le', 'Vi', 'Li', 'Sc', 'Sg', 'Cp', 'Aq', 'Pi'];
-
-/** North Indian kundli — fixed house positions */
-const KUNDLI_LAYOUT: (number | null)[][] = [
-  [12, 1, 2, 3],
-  [11, null, null, 4],
-  [10, null, null, 5],
-  [9, 8, 7, 6],
-];
 
 interface HouseData {
   house: number;
   sign: number;
-  signName: string;
-  signShort: string;
-  planets: { name: PlanetName; short: string; degree: string }[];
+  planets: { name: PlanetName; degree: string }[];
+  keywords: string[];
 }
 
 function buildHouses(chart: BirthChart): Map<number, HouseData> {
   const map = new Map<number, HouseData>();
   for (let h = 1; h <= 12; h++) {
     const sign = (chart.ascendantSign + h - 1) % 12;
-    const planets = chart.planets
-      .filter((p) => p.house === h)
-      .map((p) => ({
-        name: p.name,
-        short: PLANET_SHORT[p.name],
-        degree: p.degreeInSign.toFixed(1),
-      }));
+    const info = HOUSE_INFO.find((x) => x.house === h)!;
     map.set(h, {
       house: h,
       sign,
-      signName: SIGN_NAMES[sign],
-      signShort: SIGN_SHORT[sign],
-      planets,
+      keywords: info.keywordsGu,
+      planets: chart.planets
+        .filter((p) => p.house === h)
+        .map((p) => ({ name: p.name, degree: p.degreeInSign.toFixed(0) })),
     });
   }
   return map;
@@ -56,74 +54,136 @@ function buildHouses(chart: BirthChart): Map<number, HouseData> {
 interface KundliChartProps {
   chart: BirthChart;
   name?: string;
-  compact?: boolean;
 }
 
-export function KundliChart({ chart, name, compact = false }: KundliChartProps) {
+export function KundliChart({ chart, name }: KundliChartProps) {
+  const [selectedHouse, setSelectedHouse] = useState<number | null>(null);
   const houses = buildHouses(chart);
+  const moonNak = getNakshatra(getPlanetLon(chart, 'Moon'));
 
   return (
-    <div className={`kundli-wrap ${compact ? 'compact' : ''}`}>
-      {name && <p className="kundli-title">Kundli — {name}</p>}
-      <div className="kundli-grid">
-        {KUNDLI_LAYOUT.map((row, ri) =>
-          row.map((houseNum, ci) => {
-            if (houseNum === null) {
-              return (
-                <div
-                  key={`empty-${ri}-${ci}`}
-                  className="kundli-cell empty"
-                  aria-hidden
-                />
-              );
-            }
-            const h = houses.get(houseNum)!;
-            return (
-              <div key={houseNum} className={`kundli-cell ${houseNum === 1 ? 'lagna-cell' : ''}`}>
-                <span className="house-num">{houseNum}</span>
-                <span className="sign-label">{h.signShort}</span>
-                <div className="planet-list">
-                  {h.planets.map((p) => (
-                    <span key={p.name} className="planet-tag" title={`${p.name} ${p.degree}°`}>
-                      {p.short}
-                      {!compact && <sub>{p.degree}°</sub>}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          }),
-        )}
+    <div className="kundli-wrap">
+      {name && <p className="kundli-title">જન્મ કુંડળી — {name}</p>}
+
+      <div className="kundli-diamond-frame">
+        <div className="kundli-lagna-badge">લ</div>
+        <svg viewBox="0 0 100 100" className="kundli-diamond-svg" aria-label="North Indian Kundli">
+          {/* Outer diamond border */}
+          <polygon
+            points="50,2 98,50 50,98 2,50"
+            fill="none"
+            stroke="#e8a020"
+            strokeWidth="0.8"
+          />
+          {/* Inner cross diagonals */}
+          <line x1="2" y1="50" x2="98" y2="50" stroke="#c9a227" strokeWidth="0.35" opacity="0.7" />
+          <line x1="50" y1="2" x2="50" y2="98" stroke="#c9a227" strokeWidth="0.35" opacity="0.7" />
+          <line x1="2" y1="2" x2="98" y2="98" stroke="#c9a227" strokeWidth="0.35" opacity="0.7" />
+          <line x1="98" y1="2" x2="2" y2="98" stroke="#c9a227" strokeWidth="0.35" opacity="0.7" />
+          {/* Center */}
+          <circle cx="50" cy="50" r="3" fill="rgba(201,162,39,0.3)" stroke="#c9a227" strokeWidth="0.3" />
+        </svg>
+
+        {/* Clickable house overlays */}
+        {Object.entries(HOUSE_POSITIONS).map(([num, pos]) => {
+          const h = houses.get(Number(num))!;
+          const isLagna = Number(num) === 1;
+          return (
+            <button
+              key={num}
+              type="button"
+              className={`kundli-house-btn ${isLagna ? 'lagna-house' : ''}`}
+              style={{
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                width: `${pos.w}px`,
+                transform: 'translate(-50%, -50%)',
+              }}
+              onClick={() => setSelectedHouse(Number(num))}
+              title={h.keywords.join(', ')}
+            >
+              <span className="k-house-num">{num}</span>
+              <span className="k-sign">{SIGN_GU[h.sign]}</span>
+              <span className="k-keywords">{h.keywords.slice(0, 2).join(' · ')}</span>
+              <span className="k-planets">
+                {h.planets.map((p) => (
+                  <span key={p.name} className="k-planet">
+                    {PLANET_SHORT_GU[p.name]}
+                    <sub>{p.degree}°</sub>
+                  </span>
+                ))}
+              </span>
+            </button>
+          );
+        })}
       </div>
-      <div className="kundli-legend">
-        <span>Lagna: {chart.ascendantSignName}</span>
-        <span>Su Sun · Mo Moon · Ma Mars · Me Mercury · Ju Jupiter · Ve Venus · Sa Saturn · Ra Rahu · Ke Ketu</span>
+
+      <p className="kundli-tap-hint">👆 ભાવ પર ટેપ કરો — વિગતવાર માહિતી / Tap any house for details</p>
+
+      <div className="kundli-summary">
+        <div className="summary-row">
+          <span><strong>લગ્ન:</strong> {SIGN_GU_FULL[chart.ascendantSign]}</span>
+          <span><strong>ચંદ્ર નક્ષત્ર:</strong> {moonNak.nameGu} (પાદ {moonNak.pada})</span>
+        </div>
       </div>
+
+      <HouseInfoModal house={selectedHouse} chart={chart} onClose={() => setSelectedHouse(null)} />
     </div>
   );
 }
 
+function getPlanetLon(chart: BirthChart, name: PlanetName): number {
+  return chart.planets.find((p) => p.name === name)!.longitude;
+}
+
 export function PlanetTable({ chart }: { chart: BirthChart }) {
+  const moonNak = getNakshatra(chart.planets.find((p) => p.name === 'Moon')!.longitude);
+
   return (
-    <table className="planet-table">
-      <thead>
-        <tr>
-          <th>Graha</th>
-          <th>Rashi</th>
-          <th>House</th>
-          <th>Degree</th>
-        </tr>
-      </thead>
-      <tbody>
-        {chart.planets.map((p) => (
-          <tr key={p.name}>
-            <td>{p.name}</td>
-            <td>{p.signName}</td>
-            <td>{p.house}</td>
-            <td>{p.degreeInSign.toFixed(2)}°</td>
+    <div className="planet-table-wrap">
+      <h4 className="table-title">ગ્રહ સ્થિતિ / Graha Details</h4>
+      <table className="planet-table">
+        <thead>
+          <tr>
+            <th>ગ્રહ</th>
+            <th>રાશિ</th>
+            <th>ભાવ</th>
+            <th>અંશ</th>
+            <th>સ્વામી</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {chart.planets.map((p) => {
+            const lord = getHouseLord(chart, p.house);
+            return (
+              <tr key={p.name}>
+                <td>{PLANET_GU[p.name]}</td>
+                <td>{SIGN_GU_FULL[p.sign]}</td>
+                <td>{p.house}</td>
+                <td>{p.degreeInSign.toFixed(2)}°</td>
+                <td>{PLANET_GU[lord]}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div className="astro-depth">
+        <h4>વિસ્તૃત માહિતી / In-depth</h4>
+        <ul>
+          <li><strong>જન્મ નક્ષત્ર:</strong> {moonNak.nameGu} ({moonNak.name}) — પાદ {moonNak.pada}</li>
+          <li><strong>લગ્ન રાશિ:</strong> {SIGN_GU_FULL[chart.ascendantSign]}</li>
+          {HOUSE_INFO.slice(0, 4).map((h) => {
+            const lord = getHouseLord(chart, h.house);
+            const sign = (chart.ascendantSign + h.house - 1) % 12;
+            return (
+              <li key={h.house}>
+                <strong>{h.house} ભાવ ({h.keywordsGu[0]}):</strong>{' '}
+                {SIGN_GU[sign]} — સ્વામી {PLANET_GU[lord]}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
   );
 }
