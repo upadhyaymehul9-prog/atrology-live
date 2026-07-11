@@ -652,20 +652,21 @@ body {
 }
 
 .kundli-title {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--accent-soft);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   text-align: center;
   font-weight: 600;
 }
 
-.kundli-scroll {
-  max-width: 360px;
+.kundli-card {
+  width: 100%;
+  max-width: 380px;
   margin: 0 auto;
-  padding: 12px 8px;
-  background: linear-gradient(180deg, #d4a853 0%, #c9953a 8%, #f5e6c8 15%, #f5e6c8 85%, #c9953a 92%, #d4a853 100%);
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
 }
 
 .kundli-svg {
@@ -676,31 +677,50 @@ body {
 
 .kundli-svg .k-lagna-mark {
   font-family: 'Noto Sans Gujarati', serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  fill: #5c3a1e;
+  fill: #92400e;
 }
 
 .kundli-svg .k-sign-num {
-  font-family: 'Segoe UI', sans-serif;
-  font-size: 22px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 20px;
   font-weight: 700;
-  fill: #e87800;
+  fill: #ea580c;
+}
+
+.kundli-svg .k-sign-name {
+  font-family: 'Noto Sans Gujarati', 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  fill: #78716c;
 }
 
 .kundli-svg .k-planets {
   font-family: 'Noto Sans Gujarati', 'Segoe UI', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  fill: #1a1a1a;
+  font-size: 12px;
+  font-weight: 700;
+  fill: #1c1917;
 }
 
-.kundli-svg .k-house-group:hover .k-sign-num {
-  fill: #c45a00;
+.kundli-svg .k-hit-area {
+  fill: transparent;
+  cursor: pointer;
+  transition: fill 0.15s;
 }
 
-.kundli-svg .k-house-group:hover circle {
-  fill: rgba(232, 120, 0, 0.12);
+.kundli-svg .k-house-group:hover .k-hit-area,
+.kundli-svg .k-house-group:focus .k-hit-area {
+  fill: rgba(234, 88, 12, 0.1);
+}
+
+.kundli-svg .k-house-group.is-lagna .k-sign-num {
+  fill: #c2410c;
+}
+
+.kundli-svg .k-house-group {
+  cursor: pointer;
+  outline: none;
 }
 
 .kundli-tap-hint,

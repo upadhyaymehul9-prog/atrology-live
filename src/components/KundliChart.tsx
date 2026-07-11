@@ -2,29 +2,27 @@ import { useState } from 'react';
 import type { BirthChart, PlanetName } from '../types';
 import {
   getNakshatra,
-  HOUSE_INFO,
   PLANET_GU,
   PLANET_SHORT_GU,
   SIGN_GU,
   SIGN_GU_FULL,
 } from '../data/kundliGu';
-import { getHouseLord } from '../lib/ephemeris';
 import { HouseInfoModal } from './HouseInfoModal';
 
-/** Fixed North Indian house label positions (viewBox 400×400) */
-const HOUSE_CENTERS: Record<number, { x: number; y: number }> = {
-  1: { x: 200, y: 108 },
-  2: { x: 108, y: 108 },
-  3: { x: 52, y: 200 },
-  4: { x: 108, y: 292 },
-  5: { x: 108, y: 352 },
-  6: { x: 200, y: 352 },
-  7: { x: 200, y: 292 },
-  8: { x: 292, y: 352 },
-  9: { x: 348, y: 200 },
-  10: { x: 292, y: 292 },
-  11: { x: 292, y: 108 },
-  12: { x: 348, y: 108 },
+/** North Indian fixed house centres (viewBox 420×420) */
+const HOUSE_CENTERS: Record<number, { x: number; y: number; anchor: 'start' | 'middle' | 'end' }> = {
+  1: { x: 210, y: 98, anchor: 'middle' },
+  2: { x: 98, y: 98, anchor: 'middle' },
+  3: { x: 48, y: 210, anchor: 'middle' },
+  4: { x: 98, y: 322, anchor: 'middle' },
+  5: { x: 98, y: 368, anchor: 'middle' },
+  6: { x: 210, y: 368, anchor: 'middle' },
+  7: { x: 210, y: 322, anchor: 'middle' },
+  8: { x: 322, y: 368, anchor: 'middle' },
+  9: { x: 372, y: 210, anchor: 'middle' },
+  10: { x: 322, y: 322, anchor: 'middle' },
+  11: { x: 322, y: 98, anchor: 'middle' },
+  12: { x: 372, y: 98, anchor: 'middle' },
 };
 
 interface HouseData {
@@ -48,6 +46,30 @@ function buildHouses(chart: BirthChart): Map<number, HouseData> {
   return map;
 }
 
+function HousePlanets({
+  x,
+  y,
+  planets,
+  anchor,
+}: {
+  x: number;
+  y: number;
+  planets: PlanetName[];
+  anchor: string;
+}) {
+  if (planets.length === 0) return null;
+  const lineHeight = planets.length > 2 ? 13 : 15;
+  return (
+    <text x={x} y={y} textAnchor={anchor as 'middle'} className="k-planets">
+      {planets.map((p, i) => (
+        <tspan key={p} x={x} dy={i === 0 ? 0 : lineHeight}>
+          {PLANET_SHORT_GU[p]}
+        </tspan>
+      ))}
+    </text>
+  );
+}
+
 interface KundliChartProps {
   chart: BirthChart;
   name?: string;
@@ -58,67 +80,90 @@ export function KundliChart({ chart, name }: KundliChartProps) {
   const houses = buildHouses(chart);
   const moonNak = getNakshatra(chart.planets.find((p) => p.name === 'Moon')!.longitude);
 
+  const grid = { x: 36, y: 36, size: 348, mid: 210 };
+  const { x: gx, y: gy, size: gs, mid: gm } = grid;
+
   return (
     <div className="kundli-wrap">
       {name && <p className="kundli-title">જન્મ કુંડળી — {name}</p>}
 
-      <div className="kundli-scroll">
-        <svg viewBox="0 0 400 400" className="kundli-svg" aria-label="North Indian Kundli">
-          {/* Parchment background */}
-          <rect x="8" y="8" width="384" height="384" fill="#f5e6c8" rx="4" />
+      <div className="kundli-card">
+        <svg viewBox="0 0 420 420" className="kundli-svg" aria-label="North Indian Kundli">
+          <defs>
+            <filter id="kundli-shadow" x="-4%" y="-4%" width="108%" height="108%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
+            </filter>
+          </defs>
 
-          {/* Red grid lines — classic North Indian diamond */}
-          <rect x="20" y="20" width="360" height="360" fill="none" stroke="#a01818" strokeWidth="2.5" />
-          <line x1="20" y1="20" x2="380" y2="380" stroke="#a01818" strokeWidth="1.8" />
-          <line x1="380" y1="20" x2="20" y2="380" stroke="#a01818" strokeWidth="1.8" />
-          <line x1="200" y1="20" x2="200" y2="200" stroke="#a01818" strokeWidth="1.8" />
-          <line x1="380" y1="200" x2="200" y2="200" stroke="#a01818" strokeWidth="1.8" />
-          <line x1="200" y1="380" x2="200" y2="200" stroke="#a01818" strokeWidth="1.8" />
-          <line x1="20" y1="200" x2="200" y2="200" stroke="#a01818" strokeWidth="1.8" />
+          {/* Chart paper */}
+          <rect
+            x={gx - 4}
+            y={gy - 4}
+            width={gs + 8}
+            height={gs + 8}
+            fill="#fff9f0"
+            rx="6"
+            filter="url(#kundli-shadow)"
+          />
 
-          {/* Lagna marker at top */}
-          <text x="200" y="14" textAnchor="middle" className="k-lagna-mark">
+          {/* Red North Indian lines */}
+          <rect x={gx} y={gy} width={gs} height={gs} fill="#fff9f0" stroke="#b91c1c" strokeWidth="2" />
+          <line x1={gx} y1={gy} x2={gx + gs} y2={gy + gs} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gx + gs} y1={gy} x2={gx} y2={gy + gs} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gm} y1={gy} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gx + gs} y1={gm} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gm} y1={gy + gs} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+          <line x1={gx} y1={gm} x2={gm} y2={gm} stroke="#b91c1c" strokeWidth="1.4" />
+
+          {/* Lagna */}
+          <text x={gm} y={gy - 10} textAnchor="middle" className="k-lagna-mark">
             લ
           </text>
 
-          {/* House content */}
           {Array.from({ length: 12 }, (_, i) => i + 1).map((houseNum) => {
             const h = houses.get(houseNum)!;
             const pos = HOUSE_CENTERS[houseNum];
-            const planetLine = h.planets.map((p) => PLANET_SHORT_GU[p]).join(' ');
+            const isLagna = houseNum === 1;
             return (
               <g
                 key={houseNum}
-                className="k-house-group"
+                className={`k-house-group ${isLagna ? 'is-lagna' : ''}`}
                 onClick={() => setSelectedHouse(houseNum)}
-                style={{ cursor: 'pointer' }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && setSelectedHouse(houseNum)}
               >
-                {/* Invisible click area */}
-                <circle cx={pos.x} cy={pos.y} r="36" fill="transparent" />
-                {/* Sign number — orange like traditional chart */}
-                <text x={pos.x} y={pos.y - 6} textAnchor="middle" className="k-sign-num">
+                <rect
+                  x={pos.x - 34}
+                  y={pos.y - 28}
+                  width="68"
+                  height="56"
+                  rx="4"
+                  className="k-hit-area"
+                />
+                <text x={pos.x} y={pos.y - 4} textAnchor={pos.anchor} className="k-sign-num">
                   {h.signNum}
                 </text>
-                {/* Planets in Gujarati */}
-                {planetLine && (
-                  <text x={pos.x} y={pos.y + 14} textAnchor="middle" className="k-planets">
-                    {planetLine}
-                  </text>
-                )}
+                <text x={pos.x} y={pos.y + 10} textAnchor={pos.anchor} className="k-sign-name">
+                  {SIGN_GU[h.sign]}
+                </text>
+                <HousePlanets
+                  x={pos.x}
+                  y={pos.y + 18}
+                  planets={h.planets}
+                  anchor={pos.anchor}
+                />
               </g>
             );
           })}
         </svg>
       </div>
 
-      <p className="kundli-tap-hint">👆 ભાવ પર ટેપ કરો — વિગત / Tap house for details</p>
+      <p className="kundli-tap-hint">ભાવ પર ટેપ કરો · Tap house for details</p>
 
       <div className="kundli-summary simple">
         <span><strong>લગ્ન:</strong> {SIGN_GU_FULL[chart.ascendantSign]}</span>
-        <span><strong>નક્ષત્ર:</strong> {moonNak.nameGu} (પાદ {moonNak.pada})</span>
+        <span><strong>નક્ષત્ર:</strong> {moonNak.nameGu} · પાદ {moonNak.pada}</span>
       </div>
 
       <HouseInfoModal house={selectedHouse} chart={chart} onClose={() => setSelectedHouse(null)} />
@@ -155,16 +200,6 @@ export function PlanetTable({ chart }: { chart: BirthChart }) {
       <div className="astro-depth simple">
         <p><strong>લગ્ન:</strong> {SIGN_GU_FULL[chart.ascendantSign]}</p>
         <p><strong>ચંદ્ર નક્ષત્ર:</strong> {moonNak.nameGu} — પાદ {moonNak.pada}</p>
-        {HOUSE_INFO.slice(1, 3).map((info) => {
-          const sign = (chart.ascendantSign + info.house - 1) % 12;
-          const lord = getHouseLord(chart, info.house);
-          return (
-            <p key={info.house}>
-              <strong>{info.house} ભાવ ({info.keywordsGu.join(', ')}):</strong>{' '}
-              {SIGN_GU[sign]} · {PLANET_GU[lord]}
-            </p>
-          );
-        })}
       </div>
     </div>
   );
