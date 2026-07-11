@@ -34,7 +34,7 @@ Your app will be live at: `https://<username>.github.io/<repo-name>/`
 ## How to Use
 
 1. **Install on phone**: Open the deployed URL → "Add to Home Screen"
-2. **Add person**: Name, WhatsApp number (with country code e.g. `919876543210`), birth date, birth time, birth place
+2. **Add yajmaan**: Name, WhatsApp number (with country code e.g. `919876543210`), birth date, birth time, birth place
 3. **View yogas**: App auto-calculates all yogas using Lahiri ayanamsa
 4. **Filter**: Use dropdown to filter e.g. only Kal Sarpa Yoga people
 5. **WhatsApp remind**: Tap green button to open WhatsApp with a personalized yoga message

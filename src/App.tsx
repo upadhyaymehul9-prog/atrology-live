@@ -70,7 +70,7 @@ export function App() {
   const bulkWhatsApp = () => {
     const selected = filtered.filter((p) => selectedIds.has(p.id));
     if (selected.length === 0) {
-      alert('Select at least one person using the checkboxes.');
+      alert('Select at least one yajmaan using the checkboxes.');
       return;
     }
 
@@ -112,7 +112,7 @@ export function App() {
         const text = await file.text();
         const count = importData(text);
         refresh();
-        alert(`Imported ${count} persons successfully.`);
+        alert(`Imported ${count} yajmaan successfully.`);
       } catch {
         alert('Failed to import. Please check the file format.');
       }
@@ -140,14 +140,14 @@ export function App() {
               setView('add');
             }}
           >
-            + Add Customer
+            + Add Yajmaan
           </button>
           <button
             type="button"
             className={view === 'list' ? 'active' : ''}
             onClick={() => setView('list')}
           >
-            People ({persons.length})
+            Yajmaan ({persons.length})
           </button>
           <button
             type="button"
@@ -165,7 +165,7 @@ export function App() {
             <div className="toolbar">
               <input
                 className="search"
-                placeholder="Search name, phone, city..."
+                placeholder="Search yajmaan name, phone, city..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -189,9 +189,9 @@ export function App() {
 
             {filtered.length === 0 ? (
               <div className="empty">
-                <p>No persons found.</p>
+                <p>No yajmaan found.</p>
                 <button type="button" className="btn primary" onClick={() => setView('add')}>
-                  Add your first person
+                  Add your first yajmaan
                 </button>
               </div>
             ) : (
@@ -248,7 +248,7 @@ function YogaInfoPanel() {
     <div className="yoga-info">
       <h2>Supported Yogas & Doshas</h2>
       <p className="hint">
-        Each person&apos;s chart is calculated using Lahiri ayanamsa and whole-sign houses.
+        Each yajmaan&apos;s chart is calculated using Lahiri ayanamsa and whole-sign houses.
       </p>
       <ul className="yoga-catalog">
         {catalog.map((y) => (

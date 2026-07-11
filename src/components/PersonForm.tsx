@@ -124,7 +124,7 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
 
   return (
     <form className="person-form" onSubmit={(e) => void handleSubmit(e)}>
-      <h2>{editPerson ? 'Edit Customer' : 'Add New Customer'}</h2>
+      <h2>{editPerson ? 'Edit Yajmaan' : 'Add New Yajmaan'}</h2>
       <p className="hint form-intro">Enter birth details — the app auto-detects yogas and fetches place coordinates.</p>
 
       <label>
