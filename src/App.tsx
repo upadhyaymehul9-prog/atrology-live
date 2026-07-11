@@ -17,7 +17,7 @@ type View = 'list' | 'add' | 'edit' | 'yoga-info';
 
 export function App() {
   const [persons, setPersons] = useState<Person[]>(() => loadPersons());
-  const [view, setView] = useState<View>('list');
+  const [view, setView] = useState<View>('add');
   const [editId, setEditId] = useState<string | null>(null);
   const [yogaFilter, setYogaFilter] = useState<YogaId | 'all' | 'any-dosha'>('all');
   const [search, setSearch] = useState('');
@@ -134,20 +134,20 @@ export function App() {
         <nav className="nav-tabs">
           <button
             type="button"
-            className={view === 'list' ? 'active' : ''}
-            onClick={() => setView('list')}
-          >
-            People ({persons.length})
-          </button>
-          <button
-            type="button"
-            className={view === 'add' ? 'active' : ''}
+            className={view === 'add' || view === 'edit' ? 'active' : ''}
             onClick={() => {
               setEditId(null);
               setView('add');
             }}
           >
-            + Add
+            + Add Customer
+          </button>
+          <button
+            type="button"
+            className={view === 'list' ? 'active' : ''}
+            onClick={() => setView('list')}
+          >
+            People ({persons.length})
           </button>
           <button
             type="button"

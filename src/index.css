@@ -373,6 +373,79 @@ body {
   flex: 1;
 }
 
+.form-intro {
+  margin-top: -8px;
+  margin-bottom: 4px;
+}
+
+.place-field {
+  position: relative;
+}
+
+.suggestions {
+  list-style: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 20;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+.suggestions li button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.suggestions li button:hover {
+  background: var(--bg-card);
+}
+
+.suggestions li button span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.geo-status {
+  font-size: 0.85rem;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.geo-status.loading {
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+}
+
+.geo-status.success {
+  color: var(--accent-soft);
+  background: rgba(201, 162, 39, 0.1);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+}
+
+.geo-status .coords {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 .empty {
   text-align: center;
   padding: 48px 16px;

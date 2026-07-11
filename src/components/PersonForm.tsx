@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { INDIAN_CITIES } from '../data/cities';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { searchLocalCities } from '../data/cities';
+import { geocodePlace, type GeocodedPlace } from '../lib/geocode';
 import { addPerson, updatePerson } from '../lib/storage';
 import type { Person } from '../types';
 
@@ -15,18 +16,70 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
   const [birthDate, setBirthDate] = useState(editPerson?.birthDate ?? '');
   const [birthTime, setBirthTime] = useState(editPerson?.birthTime ?? '');
   const [placeName, setPlaceName] = useState(editPerson?.placeName ?? '');
-  const [latitude, setLatitude] = useState(editPerson?.latitude?.toString() ?? '');
-  const [longitude, setLongitude] = useState(editPerson?.longitude?.toString() ?? '');
+  const [resolvedPlace, setResolvedPlace] = useState<GeocodedPlace | null>(
+    editPerson
+      ? {
+          name: editPerson.placeName,
+          displayName: editPerson.placeName,
+          lat: editPerson.latitude,
+          lng: editPerson.longitude,
+          source: 'local',
+        }
+      : null,
+  );
+  const [suggestions, setSuggestions] = useState(searchLocalCities('', 8));
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [notes, setNotes] = useState(editPerson?.notes ?? '');
   const [error, setError] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const selectCity = (city: (typeof INDIAN_CITIES)[number]) => {
+  const resolvePlace = useCallback(async (query: string) => {
+    const q = query.trim();
+    if (!q) {
+      setResolvedPlace(null);
+      return null;
+    }
+    setGeoLoading(true);
+    const result = await geocodePlace(q);
+    setGeoLoading(false);
+    if (result) setResolvedPlace(result);
+    return result;
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!placeName.trim()) {
+      setResolvedPlace(null);
+      setSuggestions(searchLocalCities('', 8));
+      return;
+    }
+
+    setSuggestions(searchLocalCities(placeName, 8));
+
+    debounceRef.current = setTimeout(() => {
+      void resolvePlace(placeName);
+    }, 400);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [placeName, resolvePlace]);
+
+  const selectSuggestion = (city: { name: string; state?: string; lat: number; lng: number }) => {
     setPlaceName(city.name);
-    setLatitude(city.lat.toString());
-    setLongitude(city.lng.toString());
+    setResolvedPlace({
+      name: city.name,
+      displayName: city.state ? `${city.name}, ${city.state}` : city.name,
+      lat: city.lat,
+      lng: city.lng,
+      source: 'local',
+    });
+    setShowSuggestions(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -34,20 +87,29 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
     if (!phone.trim()) return setError('WhatsApp number is required');
     if (!birthDate) return setError('Birth date is required');
     if (!birthTime) return setError('Birth time is required');
-    if (!latitude || !longitude) return setError('Birth place coordinates are required');
+    if (!placeName.trim()) return setError('Birth place is required');
 
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
-    if (Number.isNaN(lat) || Number.isNaN(lng)) return setError('Invalid coordinates');
+    setSubmitting(true);
+    let place = resolvedPlace;
+    if (!place || place.name.toLowerCase() !== placeName.trim().toLowerCase()) {
+      place = await resolvePlace(placeName);
+    }
+    setSubmitting(false);
+
+    if (!place) {
+      return setError(
+        'Could not find this place. Try a nearby city name (e.g. Bharuch, Mumbai) or check spelling.',
+      );
+    }
 
     const data = {
       name: name.trim(),
       phone: phone.trim(),
       birthDate,
       birthTime,
-      latitude: lat,
-      longitude: lng,
-      placeName: placeName.trim() || 'Custom location',
+      latitude: place.lat,
+      longitude: place.lng,
+      placeName: place.displayName,
       notes: notes.trim() || undefined,
     };
 
@@ -61,8 +123,9 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
   };
 
   return (
-    <form className="person-form" onSubmit={handleSubmit}>
-      <h2>{editPerson ? 'Edit Person' : 'Add New Person'}</h2>
+    <form className="person-form" onSubmit={(e) => void handleSubmit(e)}>
+      <h2>{editPerson ? 'Edit Customer' : 'Add New Customer'}</h2>
+      <p className="hint form-intro">Enter birth details — the app auto-detects yogas and fetches place coordinates.</p>
 
       <label>
         Full Name *
@@ -92,47 +155,60 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
       </div>
       <small className="hint">Use exact local birth time for accurate yoga detection</small>
 
-      <label>
-        Birth Place
-        <input
-          value={placeName}
-          onChange={(e) => setPlaceName(e.target.value)}
-          placeholder="City name"
-        />
-      </label>
+      <div className="place-field">
+        <label>
+          Birth Place (City / Town) *
+          <input
+            value={placeName}
+            onChange={(e) => {
+              setPlaceName(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            placeholder="e.g. Bharuch, Mumbai, Delhi"
+            autoComplete="off"
+          />
+        </label>
 
-      <div className="city-chips">
-        {INDIAN_CITIES.slice(0, 8).map((city) => (
-          <button
-            key={city.name}
-            type="button"
-            className={`chip ${placeName === city.name ? 'active' : ''}`}
-            onClick={() => selectCity(city)}
-          >
-            {city.name}
-          </button>
-        ))}
+        {showSuggestions && suggestions.length > 0 && (
+          <ul className="suggestions">
+            {suggestions.map((city) => (
+              <li key={`${city.name}-${city.lat}`}>
+                <button type="button" onMouseDown={() => selectSuggestion(city)}>
+                  <strong>{city.name}</strong>
+                  {city.state && <span>{city.state}</span>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {geoLoading && <p className="geo-status loading">🔍 Finding coordinates…</p>}
+        {!geoLoading && resolvedPlace && (
+          <p className="geo-status success">
+            📍 {resolvedPlace.displayName}
+            <span className="coords">
+              ({resolvedPlace.lat.toFixed(4)}, {resolvedPlace.lng.toFixed(4)})
+            </span>
+          </p>
+        )}
       </div>
 
-      <div className="form-row">
-        <label>
-          Latitude *
-          <input
-            value={latitude}
-            onChange={(e) => setLatitude(e.target.value)}
-            placeholder="28.6139"
-            inputMode="decimal"
-          />
-        </label>
-        <label>
-          Longitude *
-          <input
-            value={longitude}
-            onChange={(e) => setLongitude(e.target.value)}
-            placeholder="77.2090"
-            inputMode="decimal"
-          />
-        </label>
+      <div className="city-chips">
+        {['Bharuch', 'Mumbai', 'Ahmedabad', 'Surat', 'Delhi', 'Ujjain', 'Varanasi'].map((cityName) => (
+          <button
+            key={cityName}
+            type="button"
+            className={`chip ${placeName === cityName ? 'active' : ''}`}
+            onClick={() => {
+              setPlaceName(cityName);
+              setShowSuggestions(false);
+            }}
+          >
+            {cityName}
+          </button>
+        ))}
       </div>
 
       <label>
@@ -153,8 +229,8 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
             Cancel
           </button>
         )}
-        <button type="submit" className="btn primary">
-          {editPerson ? 'Save Changes' : 'Add & Calculate Yogas'}
+        <button type="submit" className="btn primary" disabled={submitting || geoLoading}>
+          {submitting ? 'Saving…' : editPerson ? 'Save Changes' : 'Add & Calculate Yogas'}
         </button>
       </div>
     </form>
