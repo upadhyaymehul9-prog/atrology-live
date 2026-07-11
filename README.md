@@ -15,12 +15,22 @@ A **mobile-first Progressive Web App (PWA)** to manage clients, detect Vedic yog
 
 ## Quick Start (Development)
 
+**Always verify locally before pushing changes:**
+
 ```bash
 npm install
-npm run dev
+npm run dev          # open http://localhost:5173 and check in browser
+npm run verify       # build + smoke test (run before every commit)
 ```
 
 Open http://localhost:5173 on your phone or browser.
+
+### Verification checklist (manual)
+- [ ] Add Yajmaan form opens first
+- [ ] Birth place auto-fetches coordinates
+- [ ] Country code + phone saves correctly
+- [ ] Kundli and planet table show on yajmaan card
+- [ ] Yoga filter and WhatsApp remind work
 
 ## Deploy Free on GitHub Pages
 
