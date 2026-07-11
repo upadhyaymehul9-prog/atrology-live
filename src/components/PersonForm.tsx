@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchLocalCities } from '../data/cities';
+import {
+  COUNTRY_CODES,
+  DEFAULT_COUNTRY_CODE,
+  searchCountries,
+  splitLegacyPhone,
+} from '../data/countryCodes';
 import { geocodePlace, type GeocodedPlace } from '../lib/geocode';
 import { addPerson, updatePerson } from '../lib/storage';
 import type { Person } from '../types';
@@ -10,9 +16,21 @@ interface PersonFormProps {
   onCancel?: () => void;
 }
 
+function initialPhoneFields(editPerson?: Person | null) {
+  if (!editPerson) return { countryCode: DEFAULT_COUNTRY_CODE, phone: '' };
+  if (editPerson.countryCode) {
+    return { countryCode: editPerson.countryCode, phone: editPerson.phone };
+  }
+  return splitLegacyPhone(editPerson.phone);
+}
+
 export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
+  const initial = initialPhoneFields(editPerson);
   const [name, setName] = useState(editPerson?.name ?? '');
-  const [phone, setPhone] = useState(editPerson?.phone ?? '');
+  const [countryCode, setCountryCode] = useState(initial.countryCode);
+  const [phone, setPhone] = useState(initial.phone);
+  const [countrySearch, setCountrySearch] = useState('');
+  const [showCountryList, setShowCountryList] = useState(false);
   const [birthDate, setBirthDate] = useState(editPerson?.birthDate ?? '');
   const [birthTime, setBirthTime] = useState(editPerson?.birthTime ?? '');
   const [placeName, setPlaceName] = useState(editPerson?.placeName ?? '');
@@ -104,7 +122,8 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
 
     const data = {
       name: name.trim(),
-      phone: phone.trim(),
+      countryCode: countryCode.replace(/\D/g, ''),
+      phone: phone.replace(/\D/g, ''),
       birthDate,
       birthTime,
       latitude: place.lat,
@@ -132,16 +151,57 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Rajesh Kumar" />
       </label>
 
-      <label>
-        WhatsApp Number (with country code) *
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="919876543210"
-          inputMode="tel"
-        />
-        <small>Example: 91 for India + 10-digit mobile</small>
-      </label>
+      <div className="phone-row">
+        <label className="country-code-field">
+          Country Code *
+          <div className="country-select-wrap">
+            <button
+              type="button"
+              className="country-select-btn"
+              onClick={() => setShowCountryList((v) => !v)}
+            >
+              {COUNTRY_CODES.find((c) => c.code === countryCode)?.flag ?? '🌍'} +{countryCode}
+            </button>
+            {showCountryList && (
+              <div className="country-dropdown">
+                <input
+                  className="country-search"
+                  placeholder="Search country..."
+                  value={countrySearch}
+                  onChange={(e) => setCountrySearch(e.target.value)}
+                  autoFocus
+                />
+                <ul>
+                  {searchCountries(countrySearch).map((c) => (
+                    <li key={`${c.code}-${c.name}`}>
+                      <button
+                        type="button"
+                        onMouseDown={() => {
+                          setCountryCode(c.code);
+                          setShowCountryList(false);
+                          setCountrySearch('');
+                        }}
+                      >
+                        {c.flag} +{c.code} {c.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </label>
+        <label className="phone-number-field">
+          WhatsApp Number *
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+            placeholder="8511180957"
+            inputMode="tel"
+          />
+        </label>
+      </div>
+      <small className="hint">Select country code, then enter mobile number without leading zero</small>
 
       <div className="form-row">
         <label>

@@ -1,7 +1,10 @@
+import { useState } from 'react';
+import { KundliChart, PlanetTable } from './KundliChart';
 import {
   buildWhatsAppUrl,
   buildYogaReminderMessage,
   deletePerson,
+  displayPhone,
 } from '../lib/storage';
 import type { PersonWithYogas, YogaId } from '../types';
 
@@ -22,6 +25,8 @@ export function PersonCard({
   isSelected,
   onToggleSelect,
 }: PersonCardProps) {
+  const [showKundli, setShowKundli] = useState(true);
+
   const visibleYogas =
     selectedYogaFilter === 'all'
       ? person.activeYogas
@@ -35,7 +40,7 @@ export function PersonCard({
       return;
     }
     const message = buildYogaReminderMessage(person.name, visibleYogas);
-    window.open(buildWhatsAppUrl(person.phone, message), '_blank');
+    window.open(buildWhatsAppUrl(person, message), '_blank');
   };
 
   const confirmDelete = () => {
@@ -59,10 +64,26 @@ export function PersonCard({
             <p className="meta">
               {person.birthDate} · {person.birthTime} · {person.placeName}
             </p>
-            <p className="meta phone">📱 +{person.phone.replace(/\D/g, '')}</p>
+            <p className="meta phone">📱 {displayPhone(person)}</p>
           </div>
         </label>
         <span className="lagna">Lagna: {person.chart.ascendantSignName}</span>
+      </div>
+
+      <div className="kundli-section">
+        <button
+          type="button"
+          className="kundli-toggle"
+          onClick={() => setShowKundli((v) => !v)}
+        >
+          {showKundli ? '▼ Hide Kundli' : '▶ Show Full Kundli'}
+        </button>
+        {showKundli && (
+          <>
+            <KundliChart chart={person.chart} compact />
+            <PlanetTable chart={person.chart} />
+          </>
+        )}
       </div>
 
       {visibleYogas.length > 0 ? (

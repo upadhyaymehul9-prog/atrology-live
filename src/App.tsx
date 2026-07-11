@@ -86,7 +86,7 @@ export function App() {
 
       const message = buildYogaReminderMessage(person.name, yogas);
       setTimeout(() => {
-        window.open(buildWhatsAppUrl(person.phone, message), '_blank');
+        window.open(buildWhatsAppUrl(person, message), '_blank');
       }, index * 800);
     });
   };

@@ -528,3 +528,210 @@ body {
     justify-content: space-between;
   }
 }
+
+.phone-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+}
+
+.country-code-field,
+.phone-number-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.country-select-wrap {
+  position: relative;
+}
+
+.country-select-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin-top: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-height: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.country-search {
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.country-dropdown ul {
+  list-style: none;
+  overflow-y: auto;
+  max-height: 210px;
+}
+
+.country-dropdown li button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.country-dropdown li button:hover {
+  background: var(--bg-card);
+}
+
+.kundli-section {
+  margin: 12px 0;
+}
+
+.kundli-toggle {
+  background: transparent;
+  border: none;
+  color: var(--accent-soft);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 8px;
+}
+
+.kundli-wrap {
+  margin-bottom: 12px;
+}
+
+.kundli-title {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.kundli-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.kundli-cell {
+  background: var(--bg);
+  min-height: 72px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+}
+
+.kundli-cell.empty {
+  background: var(--bg-card);
+  opacity: 0.4;
+}
+
+.kundli-cell.lagna-cell {
+  background: rgba(201, 162, 39, 0.12);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+}
+
+.house-num {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  position: absolute;
+  top: 3px;
+  left: 4px;
+}
+
+.sign-label {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.planet-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.planet-tag {
+  font-size: 0.7rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: var(--text);
+}
+
+.planet-tag sub {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+}
+
+.kundli-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.planet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-top: 10px;
+}
+
+.planet-table th,
+.planet-table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.planet-table th {
+  background: var(--bg-elevated);
+  color: var(--accent-soft);
+  font-weight: 600;
+}
+
+.planet-table td {
+  color: var(--text-muted);
+}
+
+.planet-table tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.02);
+}

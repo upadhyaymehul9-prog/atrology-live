@@ -1,15 +1,39 @@
+import {
+  DEFAULT_COUNTRY_CODE,
+  formatDisplayPhone,
+  fullPhoneNumber,
+  splitLegacyPhone,
+} from '../data/countryCodes';
 import type { Person, PersonWithYogas } from '../types';
 import { computeBirthChart } from './ephemeris';
 import { detectYogas } from './yogas';
 
 const STORAGE_KEY = 'yoga-jyotish-persons-v1';
 
+type StoredPerson = Person & { countryCode?: string };
+
+function normalizePerson(raw: StoredPerson): Person {
+  if (raw.countryCode) {
+    return {
+      ...raw,
+      countryCode: raw.countryCode.replace(/\D/g, ''),
+      phone: raw.phone.replace(/\D/g, ''),
+    };
+  }
+  const split = splitLegacyPhone(raw.phone ?? '');
+  return {
+    ...raw,
+    countryCode: split.countryCode,
+    phone: split.phone,
+  };
+}
+
 export function loadPersons(): Person[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as Person[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(raw) as StoredPerson[];
+    return Array.isArray(parsed) ? parsed.map(normalizePerson) : [];
   } catch {
     return [];
   }
@@ -23,6 +47,8 @@ export function addPerson(person: Omit<Person, 'id' | 'createdAt'>): Person {
   const persons = loadPersons();
   const newPerson: Person = {
     ...person,
+    countryCode: person.countryCode || DEFAULT_COUNTRY_CODE,
+    phone: person.phone.replace(/\D/g, ''),
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
   };
@@ -35,7 +61,13 @@ export function updatePerson(id: string, updates: Partial<Person>): Person | nul
   const persons = loadPersons();
   const index = persons.findIndex((p) => p.id === id);
   if (index === -1) return null;
-  persons[index] = { ...persons[index], ...updates, id };
+  persons[index] = {
+    ...persons[index],
+    ...updates,
+    id,
+    countryCode: (updates.countryCode ?? persons[index].countryCode).replace(/\D/g, ''),
+    phone: (updates.phone ?? persons[index].phone).replace(/\D/g, ''),
+  };
   savePersons(persons);
   return persons[index];
 }
@@ -65,19 +97,26 @@ export function exportData(): string {
 }
 
 export function importData(json: string): number {
-  const parsed = JSON.parse(json) as Person[];
+  const parsed = JSON.parse(json) as StoredPerson[];
   if (!Array.isArray(parsed)) throw new Error('Invalid backup file');
-  savePersons(parsed);
+  savePersons(parsed.map(normalizePerson));
   return parsed.length;
+}
+
+export function getWhatsAppNumber(person: Person): string {
+  return fullPhoneNumber(person.countryCode, person.phone);
 }
 
 export function formatWhatsAppNumber(phone: string): string {
   return phone.replace(/\D/g, '');
 }
 
-export function buildWhatsAppUrl(phone: string, message: string): string {
-  const num = formatWhatsAppNumber(phone);
-  return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
+export function buildWhatsAppUrl(person: Person, message: string): string {
+  return `https://wa.me/${getWhatsAppNumber(person)}?text=${encodeURIComponent(message)}`;
+}
+
+export function displayPhone(person: Person): string {
+  return formatDisplayPhone(person.countryCode, person.phone);
 }
 
 export function buildYogaReminderMessage(

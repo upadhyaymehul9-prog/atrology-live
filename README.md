@@ -41,7 +41,7 @@ Your app will be live at: `https://<username>.github.io/<repo-name>/`
 
 ## Data Privacy
 
-- All person data is stored in **browser localStorage** on your device
+- All yajmaan data is stored in **browser localStorage** on your device
 - No backend, no cloud sync, no tracking
 - Use Backup/Restore to transfer data between devices manually
 

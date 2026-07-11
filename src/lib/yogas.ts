@@ -15,12 +15,12 @@ interface YogaRule {
 const YOGA_RULES: YogaRule[] = [
   {
     id: 'kalsarpa',
-    name: 'Kal Sarpa Yoga',
-    nameHi: 'कालसर्प योग',
+    name: 'Kaal Sarp Dosh (Kal Sarpa Yoga)',
+    nameHi: 'काल सर्प दोष',
     category: 'dosha',
     severity: 'high',
     description:
-      'All seven planets lie between Rahu and Ketu. Often associated with delays, obstacles, and karmic lessons.',
+      'All seven planets (Sun to Saturn) lie on one side of the Rahu–Ketu axis. This is the full Kaal Sarp Dosh — not the same as partial Naga Dosh.',
     remedy: 'Kal Sarpa puja, Nag devata worship, Rahu-Ketu shanti.',
     check: isKalSarpa,
   },
@@ -153,12 +153,13 @@ const YOGA_RULES: YogaRule[] = [
   },
   {
     id: 'sarp-dosh',
-    name: 'Sarp Dosh',
-    nameHi: 'सर्प दोष',
+    name: 'Naga Dosh (Partial — not Kaal Sarp)',
+    nameHi: 'नाग दोष',
     category: 'dosha',
     severity: 'medium',
-    description: 'Rahu in lagna or 2nd house, or three or more planets in Rahu-Ketu axis signs.',
-    remedy: 'Nag puja, Rahu shanti, visit Kal Sarp temples.',
+    description:
+      'Partial snake affliction: Rahu in 1st/2nd house, or 3+ planets in Rahu/Ketu signs. This is NOT the same as full Kaal Sarp Dosh (Kal Sarpa Yoga).',
+    remedy: 'Nag puja, Rahu shanti. If Kaal Sarp Dosh is also present, do full Kal Sarpa puja.',
     check: (chart) => {
       const rahu = getPlanet(chart, 'Rahu');
       if (rahu.house === 1 || rahu.house === 2) return true;

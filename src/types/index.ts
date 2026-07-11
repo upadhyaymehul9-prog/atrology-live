@@ -39,6 +39,7 @@ export interface YogaResult {
 export interface Person {
   id: string;
   name: string;
+  countryCode: string;
   phone: string;
   birthDate: string;
   birthTime: string;
