@@ -182,18 +182,119 @@ export function isBetween(long: number, start: number, end: number): boolean {
   return long >= start || long <= end;
 }
 
-/** All classical planets hemmed on one side of Rahu-Ketu axis */
 export function isKalSarpa(chart: BirthChart): boolean {
-  const classical = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'] as const;
+  const count = countPlanetsInRahuKetuArc(chart);
+  return count.max === 7;
+}
+
+const CLASSICAL: Exclude<PlanetName, 'Rahu' | 'Ketu'>[] = [
+  'Sun',
+  'Moon',
+  'Mars',
+  'Mercury',
+  'Jupiter',
+  'Venus',
+  'Saturn',
+];
+
+/** Count classical planets on each side of the Rahu–Ketu axis */
+export function countPlanetsInRahuKetuArc(chart: BirthChart): {
+  rahuToKetu: number;
+  ketuToRahu: number;
+  max: number;
+} {
   const rahu = getPlanet(chart, 'Rahu').longitude;
   const ketu = getPlanet(chart, 'Ketu').longitude;
+  let rahuToKetu = 0;
+  let ketuToRahu = 0;
+  for (const name of CLASSICAL) {
+    const l = getPlanet(chart, name).longitude;
+    if (isBetween(l, rahu, ketu)) rahuToKetu++;
+    if (isBetween(l, ketu, rahu)) ketuToRahu++;
+  }
+  return { rahuToKetu, ketuToRahu, max: Math.max(rahuToKetu, ketuToRahu) };
+}
 
-  const longs = classical.map((n) => getPlanet(chart, n).longitude);
+/** Partial Kaal Sarp — 5 or 6 of 7 planets on one side, but not all 7 */
+export function isArdhKalSarpa(chart: BirthChart): boolean {
+  if (isKalSarpa(chart)) return false;
+  const { max } = countPlanetsInRahuKetuArc(chart);
+  return max >= 5 && max <= 6;
+}
 
-  const allInRahuToKetu = longs.every((l) => isBetween(l, rahu, ketu));
-  const allInKetuToRahu = longs.every((l) => isBetween(l, ketu, rahu));
+export function getKalSarpTypeName(rahuHouse: number): { name: string; nameHi: string } {
+  const types: Record<number, { name: string; nameHi: string }> = {
+    1: { name: 'Anant Kaal Sarp', nameHi: 'अनंत कालसर्प' },
+    2: { name: 'Kulik Kaal Sarp', nameHi: 'कुलिक कालसर्प' },
+    3: { name: 'Vasuki Kaal Sarp', nameHi: 'वासुकि कालसर्प' },
+    4: { name: 'Shankhpal Kaal Sarp', nameHi: 'शंखपाल कालसर्प' },
+    5: { name: 'Padma Kaal Sarp', nameHi: 'पद्म कालसर्प' },
+    6: { name: 'Mahapadma Kaal Sarp', nameHi: 'महापद्म कालसर्प' },
+    7: { name: 'Takshak Kaal Sarp', nameHi: 'तक्षक कालसर्प' },
+    8: { name: 'Karkotak Kaal Sarp', nameHi: 'कर्कोटक कालसर्प' },
+    9: { name: 'Shankhachud Kaal Sarp', nameHi: 'शंखचूड़ कालसर्प' },
+    10: { name: 'Ghatak Kaal Sarp', nameHi: 'घाटक कालसर्प' },
+    11: { name: 'Vishdhar Kaal Sarp', nameHi: 'विषधर कालसर्प' },
+    12: { name: 'Sheshnag Kaal Sarp', nameHi: 'शेषनाग कालसर्प' },
+  };
+  return types[rahuHouse] ?? { name: 'Kaal Sarp', nameHi: 'कालसर्प' };
+}
 
-  return allInRahuToKetu || allInKetuToRahu;
+const SIGN_LORDS: PlanetName[] = [
+  'Mars',
+  'Venus',
+  'Mercury',
+  'Moon',
+  'Sun',
+  'Mercury',
+  'Venus',
+  'Mars',
+  'Jupiter',
+  'Saturn',
+  'Saturn',
+  'Jupiter',
+];
+
+export function getHouseSign(chart: BirthChart, house: number): number {
+  return (chart.ascendantSign + house - 1) % 12;
+}
+
+export function getHouseLord(chart: BirthChart, house: number): PlanetName {
+  return SIGN_LORDS[getHouseSign(chart, house)];
+}
+
+export function isLordInHouses(chart: BirthChart, house: number, targetHouses: number[]): boolean {
+  const lord = getHouseLord(chart, house);
+  const p = getPlanet(chart, lord);
+  return targetHouses.includes(p.house);
+}
+
+export function hasMaleficInHouse(chart: BirthChart, house: number): boolean {
+  const sign = getHouseSign(chart, house);
+  const malefics: PlanetName[] = ['Saturn', 'Mars', 'Rahu', 'Ketu', 'Sun'];
+  return chart.planets.some((p) => malefics.includes(p.name) && p.sign === sign);
+}
+
+export function planetsInSign(chart: BirthChart, sign: number): PlanetPosition[] {
+  return chart.planets.filter((p) => p.sign === sign);
+}
+
+export function degreeDistance(lon1: number, lon2: number): number {
+  const d = Math.abs(lon1 - lon2) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
+export function isConjunction(a: PlanetPosition, b: PlanetPosition, orb = 12): boolean {
+  return a.sign === b.sign && degreeDistance(a.longitude, b.longitude) <= orb;
+}
+
+export function isKendraFrom(fromSign: number, planetSign: number): boolean {
+  const dist = (planetSign - fromSign + 12) % 12;
+  return dist === 0 || dist === 3 || dist === 6 || dist === 9;
+}
+
+export function isDusthana(house: number): boolean {
+  return [6, 8, 12].includes(house);
 }
 
 export function signDistance(from: number, to: number): number {
