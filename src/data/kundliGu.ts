@@ -42,15 +42,15 @@ export const PLANET_GU: Record<string, string> = {
 };
 
 export const PLANET_SHORT_GU: Record<string, string> = {
-  Sun: 'સૂ',
-  Moon: 'ચ',
-  Mars: 'મ',
-  Mercury: 'બ',
-  Jupiter: 'ગ',
-  Venus: 'શુ',
-  Saturn: 'શ',
-  Rahu: 'રા',
-  Ketu: 'કે',
+  Sun: 'સૂ.',
+  Moon: 'ચં.',
+  Mars: 'મં.',
+  Mercury: 'બુ.',
+  Jupiter: 'ગુ.',
+  Venus: 'શુ.',
+  Saturn: 'શ.',
+  Rahu: 'રા.',
+  Ketu: 'કે.',
 };
 
 export const NAKSHATRA_GU = [
