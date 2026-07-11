@@ -9,20 +9,24 @@ import {
 } from '../data/kundliGu';
 import { HouseInfoModal } from './HouseInfoModal';
 
-/** North Indian fixed house centres (viewBox 420×420) */
-const HOUSE_CENTERS: Record<number, { x: number; y: number; anchor: 'start' | 'middle' | 'end' }> = {
-  1: { x: 210, y: 98, anchor: 'middle' },
-  2: { x: 98, y: 98, anchor: 'middle' },
-  3: { x: 48, y: 210, anchor: 'middle' },
-  4: { x: 98, y: 322, anchor: 'middle' },
-  5: { x: 98, y: 368, anchor: 'middle' },
-  6: { x: 210, y: 368, anchor: 'middle' },
-  7: { x: 210, y: 322, anchor: 'middle' },
-  8: { x: 322, y: 368, anchor: 'middle' },
-  9: { x: 372, y: 210, anchor: 'middle' },
-  10: { x: 322, y: 322, anchor: 'middle' },
-  11: { x: 322, y: 98, anchor: 'middle' },
-  12: { x: 372, y: 98, anchor: 'middle' },
+/**
+ * North Indian fixed house centres — geometric centroids inside each region
+ * (viewBox 420×420, grid x=36 y=36 size=348, center=210).
+ * Keeps sign numbers and planets off the red grid lines.
+ */
+const HOUSE_CENTERS: Record<number, { x: number; y: number }> = {
+  1: { x: 210, y: 123 }, // top centre diamond
+  2: { x: 123, y: 65 }, // top-left corner
+  3: { x: 123, y: 181 }, // left upper side
+  4: { x: 123, y: 210 }, // left centre diamond
+  5: { x: 123, y: 239 }, // left lower side
+  6: { x: 123, y: 355 }, // bottom-left corner
+  7: { x: 210, y: 297 }, // bottom centre diamond
+  8: { x: 297, y: 355 }, // bottom-right corner
+  9: { x: 297, y: 239 }, // right lower side
+  10: { x: 297, y: 210 }, // right centre diamond
+  11: { x: 297, y: 181 }, // right upper side
+  12: { x: 297, y: 65 }, // top-right corner
 };
 
 interface HouseData {
@@ -46,21 +50,11 @@ function buildHouses(chart: BirthChart): Map<number, HouseData> {
   return map;
 }
 
-function HousePlanets({
-  x,
-  y,
-  planets,
-  anchor,
-}: {
-  x: number;
-  y: number;
-  planets: PlanetName[];
-  anchor: string;
-}) {
+function HousePlanets({ x, y, planets }: { x: number; y: number; planets: PlanetName[] }) {
   if (planets.length === 0) return null;
   const lineHeight = planets.length > 2 ? 13 : 15;
   return (
-    <text x={x} y={y} textAnchor={anchor as 'middle'} className="k-planets">
+    <text x={x} y={y} textAnchor="middle" className="k-planets">
       {planets.map((p, i) => (
         <tspan key={p} x={x} dy={i === 0 ? 0 : lineHeight}>
           {PLANET_SHORT_GU[p]}
@@ -134,25 +128,20 @@ export function KundliChart({ chart, name }: KundliChartProps) {
                 onKeyDown={(e) => e.key === 'Enter' && setSelectedHouse(houseNum)}
               >
                 <rect
-                  x={pos.x - 34}
-                  y={pos.y - 28}
-                  width="68"
-                  height="56"
+                  x={pos.x - 30}
+                  y={pos.y - 26}
+                  width="60"
+                  height="52"
                   rx="4"
                   className="k-hit-area"
                 />
-                <text x={pos.x} y={pos.y - 4} textAnchor={pos.anchor} className="k-sign-num">
+                <text x={pos.x} y={pos.y - 10} textAnchor="middle" className="k-sign-num">
                   {h.signNum}
                 </text>
-                <text x={pos.x} y={pos.y + 10} textAnchor={pos.anchor} className="k-sign-name">
+                <text x={pos.x} y={pos.y + 6} textAnchor="middle" className="k-sign-name">
                   {SIGN_GU[h.sign]}
                 </text>
-                <HousePlanets
-                  x={pos.x}
-                  y={pos.y + 18}
-                  planets={h.planets}
-                  anchor={pos.anchor}
-                />
+                <HousePlanets x={pos.x} y={pos.y + 20} planets={h.planets} />
               </g>
             );
           })}
