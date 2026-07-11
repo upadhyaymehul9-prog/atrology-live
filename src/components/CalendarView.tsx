@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { loadPersons } from '../lib/storage';
 import {
   addEvent,
+  applyRemoteEvents,
   deleteEvent,
   formatDateKey,
   formatDisplayDate,
@@ -10,6 +11,8 @@ import {
   getEventsForDate,
   updateEvent,
 } from '../lib/calendarStorage';
+import { isSyncEnabled, subscribeToCalendar } from '../lib/familySync';
+import { SyncSettingsModal } from './SyncSettingsModal';
 import {
   EVENT_TYPE_LABELS,
   type ScheduleEvent,
@@ -26,8 +29,19 @@ export function CalendarView() {
   const [showForm, setShowForm] = useState(false);
   const [editEvent, setEditEvent] = useState<ScheduleEvent | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [syncOn, setSyncOn] = useState(isSyncEnabled());
 
   const refresh = () => setRefreshKey((k) => k + 1);
+
+  useEffect(() => {
+    if (!syncOn) return;
+    const unsubscribe = subscribeToCalendar((remoteEvents) => {
+      applyRemoteEvents(remoteEvents);
+      setRefreshKey((k) => k + 1);
+    });
+    return unsubscribe;
+  }, [syncOn]);
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -75,7 +89,18 @@ export function CalendarView() {
     <div className="calendar-view">
       <div className="cal-header">
         <h2>📅 કેલેન્ડર / Schedule</h2>
-        <p className="hint">Store meetings, work & full-day plans — saved on your phone</p>
+        <p className="hint">
+          {syncOn
+            ? '🟢 Family sync ON — બધા ફોન પર એક જ કેલેન્ડર'
+            : 'Store meetings, work & full-day plans — saved on your phone'}
+        </p>
+        <button
+          type="button"
+          className={`btn small ${syncOn ? 'primary' : 'secondary'} sync-btn`}
+          onClick={() => setShowSyncModal(true)}
+        >
+          {syncOn ? '🟢 Sync ON' : '⚪ Family Sync'}
+        </button>
       </div>
 
       <div className="cal-nav">
@@ -166,6 +191,16 @@ export function CalendarView() {
           </ul>
         )}
       </div>
+
+      {showSyncModal && (
+        <SyncSettingsModal
+          onClose={() => setShowSyncModal(false)}
+          onChanged={() => {
+            setSyncOn(isSyncEnabled());
+            refresh();
+          }}
+        />
+      )}
 
       {showForm && (
         <EventFormModal

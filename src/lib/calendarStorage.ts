@@ -1,4 +1,5 @@
 import type { ScheduleEvent } from '../types/schedule';
+import { deleteEventRemote, pushEventRemote } from './familySync';
 
 const EVENTS_KEY = 'yoga-jyotish-schedule-v1';
 
@@ -26,6 +27,7 @@ export function addEvent(event: Omit<ScheduleEvent, 'id' | 'createdAt'>): Schedu
   };
   events.push(newEvent);
   saveEvents(events);
+  pushEventRemote(newEvent);
   return newEvent;
 }
 
@@ -35,11 +37,18 @@ export function updateEvent(id: string, updates: Partial<ScheduleEvent>): Schedu
   if (index === -1) return null;
   events[index] = { ...events[index], ...updates, id };
   saveEvents(events);
+  pushEventRemote(events[index]);
   return events[index];
 }
 
 export function deleteEvent(id: string): void {
   saveEvents(loadEvents().filter((e) => e.id !== id));
+  deleteEventRemote(id);
+}
+
+/** Replace local events with the family's shared list (from sync). */
+export function applyRemoteEvents(remote: ScheduleEvent[]): void {
+  saveEvents(remote);
 }
 
 export function getEventsForDate(date: string): ScheduleEvent[] {
