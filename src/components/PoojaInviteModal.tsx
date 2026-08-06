@@ -367,8 +367,11 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
               <input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="પૂજા સામગ્રી લાવો, વગેરે"
+                placeholder="થાળી, વાટકી, ચમચી લાવવાની"
               />
+              <small className="hint">
+                English લખો તો પણ કાર્ડ/WhatsApp માં Gujarati થશે (દા.ત. Thadi, Vadki, Chamchi lavani)
+              </small>
             </label>
 
             <label>

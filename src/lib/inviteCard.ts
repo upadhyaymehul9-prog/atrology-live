@@ -1,5 +1,6 @@
 import type { YogaId, YogaResult } from '../types';
 import { yogaNameGu } from '../data/yogaNamesGu';
+import { notesToGujarati } from './notesGu';
 
 export interface InviteDetails {
   yajmaanName: string;
@@ -221,7 +222,7 @@ export async function generateInviteCard(details: InviteDetails): Promise<Blob> 
     ['📍 સ્થળ', details.place],
   ];
   if (details.notes?.trim()) {
-    rows.push(['📝 નોંધ', details.notes.trim()]);
+    rows.push(['📝 નોંધ', notesToGujarati(details.notes)]);
   }
 
   const left = 170;
@@ -321,7 +322,7 @@ export function buildPoojaInviteMessage(details: InviteDetails): string {
     `📅 તારીખ: ${date}`,
     `⏰ સમય: ${time}`,
     `📍 સ્થળ: ${details.place}`,
-    details.notes?.trim() ? `📝 નોંધ: ${details.notes.trim()}` : '',
+    details.notes?.trim() ? `📝 નોંધ: ${notesToGujarati(details.notes)}` : '',
     host ? `\nઆયોજક: ${host}` : '',
     '',
     'કૃપા કરીને ઉપરની વિગતો નોંધી લેજો.',
