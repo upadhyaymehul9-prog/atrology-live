@@ -76,6 +76,7 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
   const [error, setError] = useState('');
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
   const [step, setStep] = useState<'form' | 'send'>('form');
+  const [sendHint, setSendHint] = useState('');
   const dateInputRef = useRef<HTMLInputElement>(null);
   const timeInputRef = useRef<HTMLInputElement>(null);
 
@@ -153,21 +154,10 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
 
   const canGenerate = Boolean(selectedYoga && date && time && place.trim());
 
-  const saveCardFile = async (person: PersonWithYogas) => {
-    const details = detailsFor(person);
-    if (!details) return;
-    const b = person.id === previewPerson?.id && blob ? blob : await generateInviteCard(details);
-    const url = URL.createObjectURL(b);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = inviteFileName(details.yoga.id, person.name);
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-  };
-
   /**
-   * Open WhatsApp in the same click (avoids popup blockers).
-   * Card image downloads in the background so it can be attached in the chat.
+   * WhatsApp send: prefer native share with image (phone).
+   * On computer: open WhatsApp chat + copy card image to clipboard (Ctrl+V to paste).
+   * Does NOT auto-download the file.
    */
   const sendWhatsAppCard = (person: PersonWithYogas) => {
     const details = detailsFor(person);
@@ -176,21 +166,82 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
       return;
     }
     setError('');
+    setSendHint('');
     const message = buildPoojaInviteMessage(details);
     const waUrl = buildWhatsAppUrl(person, message);
+    const cached = person.id === previewPerson?.id ? blob : null;
 
-    // Synchronous open — must stay in the user-gesture call stack
-    const opened = window.open(waUrl, '_blank');
-    if (!opened) {
-      // Popup blocked — navigate current tab as last resort
-      window.location.href = waUrl;
+    const tryShare = (b: Blob) => {
+      const file = new File([b], inviteFileName(details.yoga.id, person.name), {
+        type: 'image/png',
+      });
+      if (!navigator.canShare?.({ files: [file] })) return false;
+      void navigator
+        .share({
+          files: [file],
+          text: message,
+          title: details.yoga.nameHi || 'પૂજા',
+        })
+        .then(() => {
+          setSentIds((prev) => new Set(prev).add(person.id));
+          setSendHint('✅ WhatsApp પર મોકલાયું / Share થયું.');
+        })
+        .catch((err: unknown) => {
+          if (err instanceof Error && err.name === 'AbortError') return;
+          openWhatsAppAndCopy(b);
+        });
+      return true;
+    };
+
+    const openWhatsAppAndCopy = (b: Blob) => {
+      // Open chat immediately (same click stack when cached blob path)
+      const opened = window.open(waUrl, '_blank');
+      if (!opened) {
+        window.location.href = waUrl;
+        return;
+      }
+      setSentIds((prev) => new Set(prev).add(person.id));
+
+      void navigator.clipboard
+        .write([new ClipboardItem({ 'image/png': b })])
+        .then(() => {
+          setSendHint(
+            '✅ કાર્ડ કૉપી થયું! WhatsApp ચેટના મેસેજ બોક્સમાં Ctrl+V દબાવો — તસવીર પેસ્ટ થશે, પછી Send.',
+          );
+        })
+        .catch(() => {
+          setSendHint(
+            'WhatsApp ખુલ્યું. Preview કાર્ડ પર right-click → Copy image → WhatsAppમાં Ctrl+V દબાવો.',
+          );
+        });
+    };
+
+    if (cached) {
+      if (tryShare(cached)) return;
+      openWhatsAppAndCopy(cached);
       return;
     }
 
-    setSentIds((prev) => new Set(prev).add(person.id));
-    void saveCardFile(person).catch((err) => {
-      console.warn('Card download failed:', err);
-    });
+    // Rare: no preview yet — open blank then navigate after generate
+    const waWin = window.open('about:blank', '_blank');
+    void generateInviteCard(details)
+      .then((b) => {
+        if (waWin) waWin.location.href = waUrl;
+        else window.open(waUrl, '_blank');
+        setSentIds((prev) => new Set(prev).add(person.id));
+        return navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);
+      })
+      .then(() => {
+        setSendHint(
+          '✅ કાર્ડ કૉપી થયું! WhatsAppમાં Ctrl+V દબાવો — તસવીર પેસ્ટ થશે, પછી Send.',
+        );
+      })
+      .catch(() => {
+        if (waWin) waWin.location.href = waUrl;
+        setSendHint(
+          'WhatsApp ખુલ્યું. Preview કાર્ડ પર right-click → Copy image → WhatsAppમાં Ctrl+V.',
+        );
+      });
   };
 
   const goSend = () => {
@@ -344,6 +395,7 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
             </div>
 
             {error && <p className="error">{error}</p>}
+            {sendHint && <p className="send-hint success">{sendHint}</p>}
 
             <div className="form-actions">
               <button type="button" className="btn secondary" onClick={onClose}>
@@ -355,6 +407,12 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
                   : `આગળ · WhatsApp (${persons.length})`}
               </button>
             </div>
+            {persons.length === 1 && (
+              <p className="hint whatsapp-paste-tip">
+                Computer પર: WhatsApp ખુલ્યા પછી મેસેજ બોક્સમાં <strong>Ctrl+V</strong> દબાવો — કાર્ડ
+                તસવીર પેસ્ટ થશે.
+              </p>
+            )}
           </form>
         ) : (
           <div className="invite-send-step">
@@ -362,13 +420,14 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
               ← Edit details
             </button>
             <p className="hint">
-              દરેક યજમાન માટે <strong>WhatsApp</strong> દબાવો — WhatsApp ચેટ સીધી ખુલશે (message તૈયાર).
-              કાર્ડ image પણ download થશે — ચેટમાં 📎 attach કરીને Send દબાવો.
+              દરેક યજમાન માટે <strong>WhatsApp</strong> દબાવો. કમ્પ્યુટર પર ચેટ ખુલ્યા પછી{' '}
+              <strong>Ctrl+V</strong> થી કાર્ડ પેસ્ટ કરો.
             </p>
             {previewUrl && (
               <img src={previewUrl} alt="Invite card" className="invite-preview small" />
             )}
             {error && <p className="error">{error}</p>}
+            {sendHint && <p className="send-hint success">{sendHint}</p>}
             <ul className="bulk-send-list">
               {persons.map((person) => {
                 const sent = sentIds.has(person.id);

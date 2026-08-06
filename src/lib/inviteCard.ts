@@ -1,4 +1,5 @@
 import type { YogaId, YogaResult } from '../types';
+import { yogaNameGu } from '../data/yogaNamesGu';
 
 export interface InviteDetails {
   yajmaanName: string;
@@ -22,28 +23,28 @@ const THEMES: Record<
     bg2: '#7f1d1d',
     accent: '#fbbf24',
     ribbon: '#b91c1c',
-    label: 'પૂજા / ઉપાય નિમંત્રણ',
+    label: 'પૂજા / ઉપાય',
   },
   medium: {
     bg1: '#431407',
     bg2: '#9a3412',
     accent: '#fdba74',
     ribbon: '#c2410c',
-    label: 'પૂજા / ઉપાય નિમંત્રણ',
+    label: 'પૂજા / ઉપાય',
   },
   low: {
     bg1: '#1e1b4b',
     bg2: '#4338ca',
     accent: '#c4b5fd',
     ribbon: '#4f46e5',
-    label: 'પૂજા / ઉપાય નિમંત્રણ',
+    label: 'પૂજા / ઉપાય',
   },
   yoga: {
     bg1: '#052e16',
     bg2: '#166534',
     accent: '#86efac',
     ribbon: '#15803d',
-    label: 'શુભ યોગ પૂજા નિમંત્રણ',
+    label: 'શુભ યોગ પૂજા',
   },
 };
 
@@ -178,47 +179,49 @@ export async function generateInviteCard(details: InviteDetails): Promise<Blob> 
 
   // Top ribbon
   ctx.fillStyle = theme.ribbon;
-  ctx.fillRect(120, 100, W - 240, 70);
+  ctx.fillRect(120, 90, W - 240, 64);
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 34px "Noto Sans Gujarati", "Segoe UI", sans-serif';
+  ctx.font = 'bold 32px "Noto Sans Gujarati", "Segoe UI", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(theme.label, W / 2, 146);
+  ctx.fillText(theme.label, W / 2, 132);
 
-  // Om / brand
+  // Om
   ctx.fillStyle = theme.accent;
-  ctx.font = 'bold 72px serif';
-  ctx.fillText('ॐ', W / 2, 260);
-  drawOrnament(ctx, W / 2, 290, theme.accent);
+  ctx.font = 'bold 64px serif';
+  ctx.fillText('ॐ', W / 2, 230);
+  drawOrnament(ctx, W / 2, 258, theme.accent);
 
-  ctx.fillStyle = '#fff7ed';
-  ctx.font = '600 28px "Segoe UI", sans-serif';
-  ctx.fillText('Yoga Jyotish', W / 2, 340);
-
-  // Dosha name
-  ctx.fillStyle = theme.accent;
-  ctx.font = 'bold 52px "Noto Sans Gujarati", "Segoe UI", sans-serif';
-  const doshaTitle = details.yoga.nameHi || details.yoga.name;
-  wrapText(ctx, doshaTitle, W / 2, 430, W - 180, 60, 2);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.font = '28px "Segoe UI", sans-serif';
-  wrapText(ctx, details.yoga.name, W / 2, 520, W - 200, 36, 2);
-
-  // Invitee
+  // Organizer — large, centered, upper-middle
+  const host = details.hostName?.trim() || 'Yoga Jyotish';
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 40px "Noto Sans Gujarati", "Segoe UI", sans-serif';
-  ctx.fillText('આપને સાદર આમંત્રણ', W / 2, 600);
-  ctx.font = 'bold 46px "Segoe UI", sans-serif';
-  const nameEnd = wrapText(ctx, details.yajmaanName, W / 2, 660, W - 180, 52, 2);
+  ctx.font = 'bold 56px "Noto Sans Gujarati", "Segoe UI", sans-serif';
+  const hostEnd = wrapText(ctx, host, W / 2, 320, W - 160, 62, 2);
+  ctx.fillStyle = theme.accent;
+  ctx.font = '26px "Noto Sans Gujarati", "Segoe UI", sans-serif';
+  ctx.fillText('આયોજક', W / 2, hostEnd + 8);
 
-  // Details rows (measure first so the box always contains the text)
+  // Dosha name (Gujarati only on card)
+  ctx.fillStyle = theme.accent;
+  ctx.font = 'bold 50px "Noto Sans Gujarati", "Segoe UI", sans-serif';
+  const doshaTitle = yogaNameGu(details.yoga.id, details.yoga.nameHi || details.yoga.name);
+  const doshaEnd = wrapText(ctx, doshaTitle, W / 2, hostEnd + 70, W - 180, 58, 2);
+
+  // Yajmaan
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.font = 'bold 28px "Noto Sans Gujarati", "Segoe UI", sans-serif';
+  ctx.fillText('યજમાન', W / 2, doshaEnd + 20);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 46px "Segoe UI", "Noto Sans Gujarati", sans-serif';
+  const nameEnd = wrapText(ctx, details.yajmaanName, W / 2, doshaEnd + 70, W - 180, 52, 2);
+
+  // Details — Gujarati labels only (date/time values stay English)
   const rows: [string, string][] = [
-    ['📅 તારીખ / Date', formatDisplayDate(details.date) || details.date],
-    ['⏰ સમય / Time', formatDisplayTime(details.time) || details.time],
-    ['📍 સ્થળ / Place', details.place],
+    ['📅 તારીખ', formatDisplayDate(details.date) || details.date],
+    ['⏰ સમય', formatDisplayTime(details.time) || details.time],
+    ['📍 સ્થળ', details.place],
   ];
   if (details.notes?.trim()) {
-    rows.push(['📝 નોંધ / Note', details.notes.trim()]);
+    rows.push(['📝 નોંધ', details.notes.trim()]);
   }
 
   const left = 170;
@@ -240,8 +243,8 @@ export async function generateInviteCard(details: InviteDetails): Promise<Blob> 
   }
   measured += bottomPad - gapAfterValue;
 
-  const boxY = Math.max(nameEnd + 24, 740);
-  const footerReserve = 110;
+  const boxY = Math.max(nameEnd + 28, 700);
+  const footerReserve = 70;
   const maxBoxH = H - boxY - footerReserve;
   const boxH = Math.min(Math.max(measured, 220), maxBoxH);
 
@@ -273,14 +276,11 @@ export async function generateInviteCard(details: InviteDetails): Promise<Blob> 
   }
   ctx.restore();
 
-  // Footer
+  // Simple footer brand (no invitation wording)
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '24px "Segoe UI", sans-serif';
-  const host = details.hostName?.trim() || 'Yoga Jyotish';
-  ctx.fillText(`— ${host} —`, W / 2, H - 90);
-  ctx.font = '20px "Segoe UI", sans-serif';
-  ctx.fillText('આધ્યાત્મિક ઉપાય માટે સાદર નિમંત્રણ', W / 2, H - 55);
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = '22px "Segoe UI", sans-serif';
+  ctx.fillText('Yoga Jyotish', W / 2, H - 55);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
@@ -310,23 +310,21 @@ function roundRect(
 export function buildPoojaInviteMessage(details: InviteDetails): string {
   const date = formatDisplayDate(details.date) || details.date;
   const time = formatDisplayTime(details.time) || details.time;
-  const dosha = details.yoga.nameHi
-    ? `${details.yoga.nameHi} (${details.yoga.name})`
-    : details.yoga.name;
+  const dosha = yogaNameGu(details.yoga.id, details.yoga.nameHi || details.yoga.name);
+  const host = details.hostName?.trim();
 
   return [
     `🙏 નમસ્તે ${details.yajmaanName},`,
     '',
-    `આપને ${dosha} ની પૂજા / વિધિ માટે સાદર આમંત્રણ.`,
+    `આપને *${dosha}* ની પૂજા / વિધિ માટે જાણ કરીએ છીએ.`,
     '',
     `📅 તારીખ: ${date}`,
     `⏰ સમય: ${time}`,
     `📍 સ્થળ: ${details.place}`,
-    details.notes?.trim() ? `📝 ${details.notes.trim()}` : '',
+    details.notes?.trim() ? `📝 નોંધ: ${details.notes.trim()}` : '',
+    host ? `\nઆયોજક: ${host}` : '',
     '',
-    'કૃપા કરીને આમંત્રણ કાર્ડ (image) જોડીને મોકલેલ છે / Please see the invitation card image.',
-    '',
-    '— Yoga Jyotish',
+    'કૃપા કરીને ઉપરની વિગતો નોંધી લેજો.',
   ]
     .filter((line) => line !== '')
     .join('\n');

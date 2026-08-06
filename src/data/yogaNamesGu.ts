@@ -1,0 +1,52 @@
+import type { YogaId } from '../types';
+
+/** Gujarati display names for pooja cards & WhatsApp (catalog nameHi is Hindi). */
+export const YOGA_NAME_GU: Record<string, string> = {
+  kalsarpa: 'કાલસર્પ દોષ',
+  'ardh-kalsarpa': 'અર્ધ કાલસર્પ દોષ',
+  'sarp-dosh': 'નાગ દોષ',
+  'pitru-dosh': 'પિતૃ દોષ',
+  'matru-dosh': 'માતૃ દોષ',
+  'putra-dosh': 'પુત્ર દોષ',
+  'grahan-dosh': 'ગ્રહણ દોષ',
+  'amavasya-dosh': 'અમાવસ્યા દોષ',
+  'gand-mool': 'ગંડમૂળ',
+  'mangal-dosh': 'મંગળ દોષ',
+  'chandra-dosh': 'ચંદ્ર દોષ',
+  'surya-dosh': 'સૂર્ય દોષ',
+  'shani-dosh': 'શનિ દોષ',
+  'budh-dosh': 'બુધ દોષ',
+  'shukra-dosh': 'શુક્ર દોષ',
+  'rahu-dosh': 'રાહુ દોષ',
+  'ketu-dosh': 'કેતુ દોષ',
+  'chandal-yog': 'ચાંડાલ યોગ',
+  'guru-chandal': 'ગુરુ ચાંડાલ યોગ',
+  kemadruma: 'કેમદ્રુમ યોગ',
+  'vish-yog': 'વિષ યોગ',
+  'shrapit-yog': 'શ્રાપિત યોગ',
+  'angarak-yog': 'અંગારક યોગ',
+  'paap-kartari': 'પાપ કર્તરી',
+  'papa-kartari-moon': 'પાપ કર્તરી (ચંદ્ર)',
+  'papa-kartari-sun': 'પાપ કર્તરી (સૂર્ય)',
+  'pishacha-yog': 'પિશાચ યોગ',
+  'shakat-yog': 'શકટ યોગ',
+  'daridra-yog': 'દારિદ્ર્ય યોગ',
+  'bhandan-yog': 'બંધન યોગ',
+  'gaj-kesari-yog': 'ગજકેસરી યોગ',
+  'chandra-mangal-yog': 'ચંદ્ર મંગળ યોગ',
+  'guru-mangal-yog': 'ગુરુ મંગળ યોગ',
+  'ruchaka-yog': 'રુચક યોગ',
+  'bhadra-yog': 'ભદ્ર યોગ',
+  'hamsa-yog': 'હંસ યોગ',
+  'malavya-yog': 'માલવ્ય યોગ',
+  'shasha-yog': 'શશ યોગ',
+  'sunfa-yog': 'સુનફા યોગ',
+  'anafa-yog': 'અનફા યોગ',
+  'durudhara-yog': 'દુરુધરા યોગ',
+  'neecha-bhanga-yog': 'નીચભંગ રાજ યોગ',
+  'dhana-yog': 'ધન યોગ',
+};
+
+export function yogaNameGu(id: YogaId | string, fallback?: string): string {
+  return YOGA_NAME_GU[id] || fallback || id;
+}

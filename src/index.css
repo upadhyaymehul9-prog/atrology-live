@@ -1213,6 +1213,20 @@ body {
   color: var(--text-muted);
 }
 
+.send-hint.success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid #16a34a;
+  color: #86efac;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.whatsapp-paste-tip {
+  text-align: center;
+}
+
 /* Calendar */
 .calendar-view {
   display: flex;
