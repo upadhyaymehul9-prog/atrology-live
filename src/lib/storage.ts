@@ -7,7 +7,7 @@ import {
 import type { Person, PersonWithYogas } from '../types';
 import { loadEvents, saveEvents } from './calendarStorage';
 import { computeBirthChart } from './ephemeris';
-import { detectYogas } from './yogas';
+import { detectYogas, yogaResultsFromIds } from './yogas';
 
 const STORAGE_KEY = 'yoga-jyotish-persons-v1';
 
@@ -78,6 +78,10 @@ export function deletePerson(id: string): void {
 }
 
 export function enrichPerson(person: Person): PersonWithYogas {
+  if (person.entryMode === 'manual') {
+    const activeYogas = yogaResultsFromIds(person.manualYogas ?? []);
+    return { ...person, chart: null, yogas: activeYogas, activeYogas };
+  }
   const chart = computeBirthChart(
     person.birthDate,
     person.birthTime,

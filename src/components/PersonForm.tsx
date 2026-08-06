@@ -8,7 +8,8 @@ import {
 } from '../data/countryCodes';
 import { geocodePlace, type GeocodedPlace } from '../lib/geocode';
 import { addPerson, updatePerson } from '../lib/storage';
-import type { Person } from '../types';
+import { getYogaCatalog } from '../lib/yogas';
+import type { Person, YogaId } from '../types';
 
 interface PersonFormProps {
   onSaved: () => void;
@@ -26,6 +27,11 @@ function initialPhoneFields(editPerson?: Person | null) {
 
 export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
   const initial = initialPhoneFields(editPerson);
+  const [mode, setMode] = useState<'kundli' | 'manual'>(
+    editPerson?.entryMode === 'manual' ? 'manual' : 'kundli',
+  );
+  const [manualYogas, setManualYogas] = useState<YogaId[]>(editPerson?.manualYogas ?? []);
+  const [yogaSearch, setYogaSearch] = useState('');
   const [name, setName] = useState(editPerson?.name ?? '');
   const [countryCode, setCountryCode] = useState(initial.countryCode);
   const [phone, setPhone] = useState(initial.phone);
@@ -97,12 +103,42 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
     setShowSuggestions(false);
   };
 
+  const toggleManualYoga = (id: YogaId) => {
+    setManualYogas((prev) =>
+      prev.includes(id) ? prev.filter((y) => y !== id) : [...prev, id],
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!name.trim()) return setError('Name is required');
     if (!phone.trim()) return setError('WhatsApp number is required');
+
+    if (mode === 'manual') {
+      const data = {
+        name: name.trim(),
+        countryCode: countryCode.replace(/\D/g, ''),
+        phone: phone.replace(/\D/g, ''),
+        birthDate: '',
+        birthTime: '',
+        latitude: 0,
+        longitude: 0,
+        placeName: '',
+        notes: notes.trim() || undefined,
+        entryMode: 'manual' as const,
+        manualYogas,
+      };
+      if (editPerson) {
+        updatePerson(editPerson.id, data);
+      } else {
+        addPerson(data);
+      }
+      onSaved();
+      return;
+    }
+
     if (!birthDate) return setError('Birth date is required');
     if (!birthTime) return setError('Birth time is required');
     if (!placeName.trim()) return setError('Birth place is required');
@@ -130,6 +166,8 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
       longitude: place.lng,
       placeName: place.displayName,
       notes: notes.trim() || undefined,
+      entryMode: 'kundli' as const,
+      manualYogas: [],
     };
 
     if (editPerson) {
@@ -144,7 +182,31 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
   return (
     <form className="person-form" onSubmit={(e) => void handleSubmit(e)}>
       <h2>{editPerson ? 'Edit Yajmaan' : 'Add New Yajmaan'}</h2>
-      <p className="hint form-intro">Enter birth details — the app auto-detects yogas and fetches place coordinates.</p>
+
+      <div className="entry-mode-toggle">
+        <button
+          type="button"
+          className={`mode-btn ${mode === 'kundli' ? 'active' : ''}`}
+          onClick={() => setMode('kundli')}
+        >
+          📜 જન્મ વિગતથી
+          <small>Auto kundli from birth details</small>
+        </button>
+        <button
+          type="button"
+          className={`mode-btn ${mode === 'manual' ? 'active' : ''}`}
+          onClick={() => setMode('manual')}
+        >
+          ✍️ સીધું ઉમેરો
+          <small>Already have kundli — tag dosha yourself</small>
+        </button>
+      </div>
+
+      <p className="hint form-intro">
+        {mode === 'kundli'
+          ? 'Enter birth details — the app auto-detects yogas and fetches place coordinates.'
+          : 'No birth details needed — just name, WhatsApp number, and tick the dosha/yoga you already know.'}
+      </p>
 
       <label>
         Full Name *
@@ -203,6 +265,50 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
       </div>
       <small className="hint">Select country code, then enter mobile number without leading zero</small>
 
+      {mode === 'manual' && (
+        <div className="manual-yoga-picker">
+          <label>
+            દોષ / યોગ પસંદ કરો ({manualYogas.length} selected)
+            <input
+              className="yoga-picker-search"
+              value={yogaSearch}
+              onChange={(e) => setYogaSearch(e.target.value)}
+              placeholder="Search dosha/yoga... (e.g. Kaal Sarp, Mangal)"
+            />
+          </label>
+          <div className="yoga-checklist">
+            {getYogaCatalog()
+              .filter((y) => {
+                const q = yogaSearch.trim().toLowerCase();
+                if (!q) return true;
+                return (
+                  y.name.toLowerCase().includes(q) ||
+                  y.nameHi.includes(yogaSearch.trim()) ||
+                  y.id.includes(q)
+                );
+              })
+              .map((y) => (
+                <label key={y.id} className={`yoga-check-item ${manualYogas.includes(y.id as YogaId) ? 'checked' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={manualYogas.includes(y.id as YogaId)}
+                    onChange={() => toggleManualYoga(y.id as YogaId)}
+                  />
+                  <span className="yoga-check-name">
+                    {y.nameHi || y.name}
+                    <small>{y.name}</small>
+                  </span>
+                  <span className={`badge ${y.category}`}>
+                    {y.category === 'dosha' ? 'દોષ' : 'યોગ'}
+                  </span>
+                </label>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {mode === 'kundli' && (
+        <>
       <div className="form-row">
         <label>
           Birth Date *
@@ -270,6 +376,8 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
           </button>
         ))}
       </div>
+        </>
+      )}
 
       <label>
         Notes (optional)
@@ -289,8 +397,18 @@ export function PersonForm({ onSaved, editPerson, onCancel }: PersonFormProps) {
             Cancel
           </button>
         )}
-        <button type="submit" className="btn primary" disabled={submitting || geoLoading}>
-          {submitting ? 'Saving…' : editPerson ? 'Save Changes' : 'Add & Calculate Yogas'}
+        <button
+          type="submit"
+          className="btn primary"
+          disabled={submitting || (mode === 'kundli' && geoLoading)}
+        >
+          {submitting
+            ? 'Saving…'
+            : editPerson
+              ? 'Save Changes'
+              : mode === 'manual'
+                ? 'Add Yajmaan'
+                : 'Add & Calculate Yogas'}
         </button>
       </div>
     </form>

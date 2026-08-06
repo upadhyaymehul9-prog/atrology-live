@@ -982,6 +982,153 @@ body {
   background: rgba(255, 255, 255, 0.02);
 }
 
+/* Entry mode toggle (Add Yajmaan form) */
+.entry-mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  padding: 12px 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mode-btn small {
+  font-weight: 400;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.mode-btn.active {
+  border-color: var(--accent);
+  background: rgba(234, 179, 8, 0.08);
+  color: var(--accent-soft);
+}
+
+/* Manual yoga picker */
+.manual-yoga-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.yoga-picker-search {
+  margin-top: 6px;
+}
+
+.yoga-checklist {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+}
+
+.yoga-check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.yoga-check-item:last-child {
+  border-bottom: none;
+}
+
+.yoga-check-item.checked {
+  background: rgba(234, 179, 8, 0.08);
+}
+
+.yoga-check-item input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+.yoga-check-name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.yoga-check-name small {
+  font-weight: 400;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Bulk send modal */
+.bulk-send-modal {
+  max-width: 480px;
+}
+
+.bulk-send-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 50vh;
+  overflow-y: auto;
+  margin: 12px 0;
+}
+
+.bulk-send-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.bulk-send-row.sent {
+  opacity: 0.65;
+  border-color: #16a34a;
+}
+
+.bulk-send-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bulk-send-info .meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.bulk-send-info .bulk-yogas {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bulk-skip-note {
+  color: #f59e0b;
+}
+
 /* Calendar */
 .calendar-view {
   display: flex;

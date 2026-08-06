@@ -48,10 +48,15 @@ export interface Person {
   placeName: string;
   notes?: string;
   createdAt: string;
+  /** 'kundli' (default) computes the chart from birth details; 'manual' uses user-tagged yogas only. */
+  entryMode?: 'kundli' | 'manual';
+  /** Doshas/yogas tagged by hand for manual entries. */
+  manualYogas?: YogaId[];
 }
 
 export interface PersonWithYogas extends Person {
-  chart: BirthChart;
+  /** null for manual entries (no birth details). */
+  chart: BirthChart | null;
   yogas: YogaResult[];
   activeYogas: YogaResult[];
 }

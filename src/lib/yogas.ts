@@ -716,6 +716,21 @@ export function detectYogas(chart: BirthChart): YogaResult[] {
   return results;
 }
 
+/** Build present YogaResults from hand-picked ids (manual/direct yajmaan entries). */
+export function yogaResultsFromIds(ids: YogaId[]): YogaResult[] {
+  const idSet = new Set(ids);
+  return YOGA_RULES.filter((r) => idSet.has(r.id)).map((r) => ({
+    id: r.id,
+    name: r.name,
+    nameHi: r.nameHi,
+    category: r.category,
+    severity: r.severity,
+    present: true,
+    description: r.description,
+    remedy: r.remedy,
+  }));
+}
+
 export function getYogaCatalog(): Pick<
   YogaResult,
   'id' | 'name' | 'nameHi' | 'category' | 'severity' | 'description'
