@@ -38,3 +38,6 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # GitHub's Pages queue can be slow; default 10 min timeout caused failures
+          timeout: 1800000
