@@ -1129,6 +1129,104 @@ body {
   color: #f59e0b;
 }
 
+/* Pooja invite card modal */
+.pooja-invite-modal {
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.invite-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invite-preview {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #111;
+}
+
+.invite-preview.small {
+  max-width: 220px;
+  margin: 0 auto 12px;
+}
+
+.invite-preview.placeholder {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.invite-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.invite-send-step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.invite-datetime-row {
+  align-items: start;
+}
+
+.picker-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.picker-row input.date-input,
+.picker-row input.time-input {
+  flex: 1;
+  min-height: 44px;
+  font-size: 1rem;
+  color-scheme: dark;
+}
+
+.picker-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.picker-selected {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--accent-soft);
+}
+
+.picker-selected.muted {
+  color: var(--text-muted);
+}
+
+.send-hint.success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid #16a34a;
+  color: #86efac;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.whatsapp-paste-tip {
+  text-align: center;
+}
+
 /* Calendar */
 .calendar-view {
   display: flex;

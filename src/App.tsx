@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { BulkSendModal } from './components/BulkSendModal';
 import { PersonCard } from './components/PersonCard';
 import { PersonForm } from './components/PersonForm';
+import { PoojaInviteModal } from './components/PoojaInviteModal';
 import { YogaFilter } from './components/YogaFilter';
 import { enrichAll, exportData, importData, loadPersons } from './lib/storage';
 import { CalendarView } from './components/CalendarView';
@@ -19,6 +20,7 @@ export function App() {
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkSend, setShowBulkSend] = useState(false);
+  const [showPoojaInvite, setShowPoojaInvite] = useState(false);
 
   const enriched = useMemo(() => enrichAll(persons), [persons]);
 
@@ -79,6 +81,14 @@ export function App() {
       return;
     }
     setShowBulkSend(true);
+  };
+
+  const bulkPoojaInvite = () => {
+    if (selectedPersons.length === 0) {
+      alert('Select at least one yajmaan (filter by dosha + Select All works best).');
+      return;
+    }
+    setShowPoojaInvite(true);
   };
 
   const handleExport = () => {
@@ -178,6 +188,9 @@ export function App() {
                 <button type="button" className="btn whatsapp" onClick={bulkWhatsApp}>
                   WhatsApp ({selectedIds.size})
                 </button>
+                <button type="button" className="btn primary small" onClick={bulkPoojaInvite}>
+                  🙏 Pooja Invite ({selectedIds.size})
+                </button>
                 <button type="button" className="btn secondary small" onClick={handleExport}>
                   Backup
                 </button>
@@ -239,6 +252,16 @@ export function App() {
             persons={selectedPersons}
             yogaFilter={yogaFilter}
             onClose={() => setShowBulkSend(false)}
+          />
+        )}
+
+        {showPoojaInvite && (
+          <PoojaInviteModal
+            persons={selectedPersons}
+            preferredYogaId={
+              yogaFilter !== 'all' && yogaFilter !== 'any-dosha' ? yogaFilter : null
+            }
+            onClose={() => setShowPoojaInvite(false)}
           />
         )}
       </main>

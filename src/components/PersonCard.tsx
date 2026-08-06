@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { KundliChart, PlanetTable } from './KundliChart';
+import { PoojaInviteModal } from './PoojaInviteModal';
 import { YogaInfoModal } from './YogaInfoModal';
 import {
   buildWhatsAppUrl,
@@ -28,6 +29,7 @@ export function PersonCard({
 }: PersonCardProps) {
   const [showKundli, setShowKundli] = useState(false);
   const [selectedYoga, setSelectedYoga] = useState<YogaResult | null>(null);
+  const [showInvite, setShowInvite] = useState(false);
 
   const visibleYogas =
     selectedYogaFilter === 'all'
@@ -35,6 +37,13 @@ export function PersonCard({
       : selectedYogaFilter === 'any-dosha'
         ? person.activeYogas.filter((y) => y.category === 'dosha')
         : person.activeYogas.filter((y) => y.id === selectedYogaFilter);
+
+  const preferredYogaId =
+    selectedYogaFilter !== 'all' && selectedYogaFilter !== 'any-dosha'
+      ? selectedYogaFilter
+      : ((visibleYogas.find((y) => y.category === 'dosha')?.id as YogaId | undefined) ??
+        (visibleYogas[0]?.id as YogaId | undefined) ??
+        null);
 
   const sendWhatsApp = () => {
     if (visibleYogas.length === 0) {
@@ -117,9 +126,20 @@ export function PersonCard({
 
       <YogaInfoModal yoga={selectedYoga} onClose={() => setSelectedYoga(null)} />
 
+      {showInvite && (
+        <PoojaInviteModal
+          persons={[person]}
+          preferredYogaId={preferredYogaId}
+          onClose={() => setShowInvite(false)}
+        />
+      )}
+
       <div className="card-actions">
         <button type="button" className="btn whatsapp" onClick={sendWhatsApp}>
           WhatsApp Remind
+        </button>
+        <button type="button" className="btn primary small" onClick={() => setShowInvite(true)}>
+          🙏 Pooja Invite
         </button>
         <button type="button" className="btn secondary small" onClick={() => onEdit(person.id)}>
           Edit
