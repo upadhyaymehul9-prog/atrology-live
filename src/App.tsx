@@ -1,15 +1,9 @@
 import { useMemo, useState } from 'react';
+import { BulkSendModal } from './components/BulkSendModal';
 import { PersonCard } from './components/PersonCard';
 import { PersonForm } from './components/PersonForm';
 import { YogaFilter } from './components/YogaFilter';
-import {
-  buildWhatsAppUrl,
-  buildYogaReminderMessage,
-  enrichAll,
-  exportData,
-  importData,
-  loadPersons,
-} from './lib/storage';
+import { enrichAll, exportData, importData, loadPersons } from './lib/storage';
 import { CalendarView } from './components/CalendarView';
 import { YogaInfoModal } from './components/YogaInfoModal';
 import { getYogaCatalog, YOGA_RULES } from './lib/yogas';
@@ -24,6 +18,7 @@ export function App() {
   const [yogaFilter, setYogaFilter] = useState<YogaId | 'all' | 'any-dosha'>('all');
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkSend, setShowBulkSend] = useState(false);
 
   const enriched = useMemo(() => enrichAll(persons), [persons]);
 
@@ -69,28 +64,21 @@ export function App() {
     });
   };
 
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
+
+  const toggleSelectAll = () => {
+    setSelectedIds(allFilteredSelected ? new Set() : new Set(filtered.map((p) => p.id)));
+  };
+
+  const selectedPersons = filtered.filter((p) => selectedIds.has(p.id));
+
   const bulkWhatsApp = () => {
-    const selected = filtered.filter((p) => selectedIds.has(p.id));
-    if (selected.length === 0) {
-      alert('Select at least one yajmaan using the checkboxes.');
+    if (selectedPersons.length === 0) {
+      alert('Select at least one yajmaan using the checkboxes (or tap Select All).');
       return;
     }
-
-    selected.forEach((person, index) => {
-      const yogas =
-        yogaFilter === 'all'
-          ? person.activeYogas
-          : yogaFilter === 'any-dosha'
-            ? person.activeYogas.filter((y) => y.category === 'dosha')
-            : person.activeYogas.filter((y) => y.id === yogaFilter);
-
-      if (yogas.length === 0) return;
-
-      const message = buildYogaReminderMessage(person.name, yogas);
-      setTimeout(() => {
-        window.open(buildWhatsAppUrl(person, message), '_blank');
-      }, index * 800);
-    });
+    setShowBulkSend(true);
   };
 
   const handleExport = () => {
@@ -184,8 +172,11 @@ export function App() {
             <div className="bulk-bar">
               <span>{filtered.length} shown · {selectedIds.size} selected</span>
               <div className="bulk-actions">
+                <button type="button" className="btn secondary small" onClick={toggleSelectAll}>
+                  {allFilteredSelected ? '☑ બધા હટાવો' : '☐ બધા પસંદ કરો'}
+                </button>
                 <button type="button" className="btn whatsapp" onClick={bulkWhatsApp}>
-                  Remind Selected on WhatsApp
+                  WhatsApp ({selectedIds.size})
                 </button>
                 <button type="button" className="btn secondary small" onClick={handleExport}>
                   Backup
@@ -242,6 +233,14 @@ export function App() {
         {view === 'yoga-info' && <YogaInfoPanel />}
 
         {view === 'calendar' && <CalendarView />}
+
+        {showBulkSend && (
+          <BulkSendModal
+            persons={selectedPersons}
+            yogaFilter={yogaFilter}
+            onClose={() => setShowBulkSend(false)}
+          />
+        )}
       </main>
 
       <footer className="footer">

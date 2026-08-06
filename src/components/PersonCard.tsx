@@ -63,30 +63,36 @@ export function PersonCard({
           />
           <div>
             <h3>{person.name}</h3>
-            <p className="meta">
-              {person.birthDate} · {person.birthTime} · {person.placeName}
-            </p>
+            {person.birthDate ? (
+              <p className="meta">
+                {person.birthDate} · {person.birthTime} · {person.placeName}
+              </p>
+            ) : (
+              <p className="meta">✍️ સીધી એન્ટ્રી · Direct entry (no birth details)</p>
+            )}
             <p className="meta phone">📱 {displayPhone(person)}</p>
           </div>
         </label>
-        <span className="lagna">Lagna: {person.chart.ascendantSignName}</span>
+        {person.chart && <span className="lagna">Lagna: {person.chart.ascendantSignName}</span>}
       </div>
 
-      <div className="kundli-section">
-        <button
-          type="button"
-          className="kundli-toggle"
-          onClick={() => setShowKundli((v) => !v)}
-        >
-          {showKundli ? '▼ કુંડળી છુપાવો' : '▶ પૂર્ણ કુંડળી જુઓ'}
-        </button>
-        {showKundli && (
-          <>
-            <KundliChart chart={person.chart} name={person.name} />
-            <PlanetTable chart={person.chart} />
-          </>
-        )}
-      </div>
+      {person.chart && (
+        <div className="kundli-section">
+          <button
+            type="button"
+            className="kundli-toggle"
+            onClick={() => setShowKundli((v) => !v)}
+          >
+            {showKundli ? '▼ કુંડળી છુપાવો' : '▶ પૂર્ણ કુંડળી જુઓ'}
+          </button>
+          {showKundli && (
+            <>
+              <KundliChart chart={person.chart} name={person.name} />
+              <PlanetTable chart={person.chart} />
+            </>
+          )}
+        </div>
+      )}
 
       {visibleYogas.length > 0 ? (
         <>
