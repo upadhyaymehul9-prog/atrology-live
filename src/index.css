@@ -1129,6 +1129,55 @@ body {
   color: #f59e0b;
 }
 
+/* Pooja invite card modal */
+.pooja-invite-modal {
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.invite-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invite-preview {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #111;
+}
+
+.invite-preview.small {
+  max-width: 220px;
+  margin: 0 auto 12px;
+}
+
+.invite-preview.placeholder {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.invite-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.invite-send-step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 /* Calendar */
 .calendar-view {
   display: flex;
