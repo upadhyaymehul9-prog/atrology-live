@@ -1178,6 +1178,41 @@ body {
   gap: 10px;
 }
 
+.invite-datetime-row {
+  align-items: start;
+}
+
+.picker-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.picker-row input.date-input,
+.picker-row input.time-input {
+  flex: 1;
+  min-height: 44px;
+  font-size: 1rem;
+  color-scheme: dark;
+}
+
+.picker-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.picker-selected {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--accent-soft);
+}
+
+.picker-selected.muted {
+  color: var(--text-muted);
+}
+
 /* Calendar */
 .calendar-view {
   display: flex;

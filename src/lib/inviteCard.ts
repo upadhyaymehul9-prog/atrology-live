@@ -71,6 +71,30 @@ function formatDisplayTime(time: string): string {
   return d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
 }
 
+function measureWrap(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines = 3,
+): number {
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return lineHeight;
+  let line = '';
+  let lines = 1;
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines++;
+      line = word;
+      if (lines >= maxLines) break;
+    } else {
+      line = test;
+    }
+  }
+  return lines * lineHeight;
+}
+
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -80,7 +104,7 @@ function wrapText(
   lineHeight: number,
   maxLines = 4,
 ): number {
-  const words = text.split(/\s+/);
+  const words = text.split(/\s+/).filter(Boolean);
   let line = '';
   let lines = 0;
   let cy = y;
@@ -92,12 +116,12 @@ function wrapText(
       cy += lineHeight;
       lines++;
       if (lines >= maxLines - 1) {
-        // last line with ellipsis if needed
         let rest = words.slice(i).join(' ');
         while (ctx.measureText(`${rest}…`).width > maxWidth && rest.length > 3) {
           rest = rest.slice(0, -1);
         }
-        ctx.fillText(rest.length < words.slice(i).join(' ').length ? `${rest}…` : rest, x, cy);
+        const full = words.slice(i).join(' ');
+        ctx.fillText(rest.length < full.length ? `${rest}…` : rest, x, cy);
         return cy + lineHeight;
       }
     } else {
@@ -183,23 +207,11 @@ export async function generateInviteCard(details: InviteDetails): Promise<Blob> 
   // Invitee
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 40px "Noto Sans Gujarati", "Segoe UI", sans-serif';
-  ctx.fillText('આપને સાદર આમંત્રણ', W / 2, 620);
-  ctx.font = 'bold 48px "Segoe UI", sans-serif';
-  wrapText(ctx, details.yajmaanName, W / 2, 680, W - 180, 56, 2);
+  ctx.fillText('આપને સાદર આમંત્રણ', W / 2, 600);
+  ctx.font = 'bold 46px "Segoe UI", sans-serif';
+  const nameEnd = wrapText(ctx, details.yajmaanName, W / 2, 660, W - 180, 52, 2);
 
-  // Details box
-  const boxY = 780;
-  ctx.fillStyle = 'rgba(0,0,0,0.28)';
-  roundRect(ctx, 120, boxY, W - 240, 360, 24);
-  ctx.fill();
-  ctx.strokeStyle = theme.accent;
-  ctx.lineWidth = 2;
-  roundRect(ctx, 120, boxY, W - 240, 360, 24);
-  ctx.stroke();
-
-  ctx.textAlign = 'left';
-  const left = 170;
-  let row = boxY + 70;
+  // Details rows (measure first so the box always contains the text)
   const rows: [string, string][] = [
     ['📅 તારીખ / Date', formatDisplayDate(details.date) || details.date],
     ['⏰ સમય / Time', formatDisplayTime(details.time) || details.time],
@@ -209,15 +221,57 @@ export async function generateInviteCard(details: InviteDetails): Promise<Blob> 
     rows.push(['📝 નોંધ / Note', details.notes.trim()]);
   }
 
+  const left = 170;
+  const maxTextW = W - 340;
+  const labelSize = 22;
+  const valueSize = 28;
+  const valueLh = 34;
+  const topPad = 40;
+  const bottomPad = 36;
+  const gapAfterValue = 20;
+
+  let measured = topPad;
+  for (const [, value] of rows) {
+    ctx.font = `bold ${labelSize}px "Noto Sans Gujarati", "Segoe UI", sans-serif`;
+    measured += 26;
+    ctx.font = `${valueSize}px "Segoe UI", sans-serif`;
+    measured += measureWrap(ctx, value, maxTextW, valueLh, 3);
+    measured += gapAfterValue;
+  }
+  measured += bottomPad - gapAfterValue;
+
+  const boxY = Math.max(nameEnd + 24, 740);
+  const footerReserve = 110;
+  const maxBoxH = H - boxY - footerReserve;
+  const boxH = Math.min(Math.max(measured, 220), maxBoxH);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  roundRect(ctx, 120, boxY, W - 240, boxH, 24);
+  ctx.fill();
+  ctx.strokeStyle = theme.accent;
+  ctx.lineWidth = 2;
+  roundRect(ctx, 120, boxY, W - 240, boxH, 24);
+  ctx.stroke();
+
+  // Clip text to the box interior
+  ctx.save();
+  roundRect(ctx, 130, boxY + 8, W - 260, boxH - 16, 18);
+  ctx.clip();
+
+  ctx.textAlign = 'left';
+  let row = boxY + topPad;
+  const boxBottom = boxY + boxH - 16;
   for (const [label, value] of rows) {
+    if (row > boxBottom - 40) break;
     ctx.fillStyle = theme.accent;
-    ctx.font = 'bold 24px "Noto Sans Gujarati", "Segoe UI", sans-serif';
+    ctx.font = `bold ${labelSize}px "Noto Sans Gujarati", "Segoe UI", sans-serif`;
     ctx.fillText(label, left, row);
     ctx.fillStyle = '#fff';
-    ctx.font = '32px "Segoe UI", sans-serif';
-    wrapText(ctx, value, left, row + 42, W - 340, 38, 2);
-    row += 85;
+    ctx.font = `${valueSize}px "Segoe UI", sans-serif`;
+    const next = wrapText(ctx, value, left, row + 30, maxTextW, valueLh, 3);
+    row = next + gapAfterValue;
   }
+  ctx.restore();
 
   // Footer
   ctx.textAlign = 'center';

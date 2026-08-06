@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   buildPoojaInviteMessage,
   generateInviteCard,
@@ -8,6 +8,17 @@ import {
 import { buildWhatsAppUrl, displayPhone } from '../lib/storage';
 import { getYogaCatalog } from '../lib/yogas';
 import type { PersonWithYogas, YogaId, YogaResult } from '../types';
+
+function formatDateLabel(dateStr: string): string {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
 
 interface PoojaInviteModalProps {
   persons: PersonWithYogas[];
@@ -65,6 +76,8 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
   const [error, setError] = useState('');
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
   const [step, setStep] = useState<'form' | 'send'>('form');
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const timeInputRef = useRef<HTMLInputElement>(null);
 
   const selectedYoga = useMemo(() => {
     const c = catalog.find((y) => y.id === yogaId);
@@ -140,7 +153,7 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
 
   const canGenerate = Boolean(selectedYoga && date && time && place.trim());
 
-  const downloadFor = async (person: PersonWithYogas) => {
+  const saveCardFile = async (person: PersonWithYogas) => {
     const details = detailsFor(person);
     if (!details) return;
     const b = person.id === previewPerson?.id && blob ? blob : await generateInviteCard(details);
@@ -149,43 +162,35 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
     a.href = url;
     a.download = inviteFileName(details.yoga.id, person.name);
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
 
-  /** WhatsApp-only: share card image when possible, else download + open WhatsApp chat. */
-  const sendWhatsAppCard = async (person: PersonWithYogas) => {
+  /**
+   * Open WhatsApp in the same click (avoids popup blockers).
+   * Card image downloads in the background so it can be attached in the chat.
+   */
+  const sendWhatsAppCard = (person: PersonWithYogas) => {
     const details = detailsFor(person);
-    if (!details) return;
-    setError('');
-    try {
-      const b = person.id === previewPerson?.id && blob ? blob : await generateInviteCard(details);
-      const file = new File([b], inviteFileName(details.yoga.id, person.name), {
-        type: 'image/png',
-      });
-      const message = buildPoojaInviteMessage(details);
-
-      if (typeof navigator !== 'undefined' && navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: `Pooja invite — ${details.yoga.nameHi || details.yoga.name}`,
-            text: message,
-          });
-          setSentIds((prev) => new Set(prev).add(person.id));
-          return;
-        } catch (err) {
-          if (err instanceof Error && err.name === 'AbortError') return;
-          // fall through to WhatsApp URL + download
-        }
-      }
-
-      // Desktop / browsers that can't share files: save card, open WhatsApp chat
-      await downloadFor(person);
-      window.open(buildWhatsAppUrl(person, message), '_blank');
-      setSentIds((prev) => new Set(prev).add(person.id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+    if (!details) {
+      setError('તારીખ, સમય અને સ્થળ ભરો');
+      return;
     }
+    setError('');
+    const message = buildPoojaInviteMessage(details);
+    const waUrl = buildWhatsAppUrl(person, message);
+
+    // Synchronous open — must stay in the user-gesture call stack
+    const opened = window.open(waUrl, '_blank');
+    if (!opened) {
+      // Popup blocked — navigate current tab as last resort
+      window.location.href = waUrl;
+      return;
+    }
+
+    setSentIds((prev) => new Set(prev).add(person.id));
+    void saveCardFile(person).catch((err) => {
+      console.warn('Card download failed:', err);
+    });
   };
 
   const goSend = () => {
@@ -193,12 +198,33 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
       setError('તારીખ, સમય અને સ્થળ ભરો / Fill date, time and place');
       return;
     }
-    // Single yajmaan → send on WhatsApp immediately
     if (persons.length === 1) {
-      void sendWhatsAppCard(persons[0]);
+      sendWhatsAppCard(persons[0]);
       return;
     }
     setStep('send');
+  };
+
+  const openDatePicker = () => {
+    const el = dateInputRef.current;
+    if (!el) return;
+    try {
+      el.showPicker();
+    } catch {
+      el.focus();
+      el.click();
+    }
+  };
+
+  const openTimePicker = () => {
+    const el = timeInputRef.current;
+    if (!el) return;
+    try {
+      el.showPicker();
+    } catch {
+      el.focus();
+      el.click();
+    }
   };
 
   return (
@@ -235,14 +261,43 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
               </select>
             </label>
 
-            <div className="form-row">
+            <div className="form-row invite-datetime-row">
               <label>
                 તારીખ / Date *
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                <div className="picker-row">
+                  <input
+                    ref={dateInputRef}
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                    className="date-input"
+                  />
+                  <button type="button" className="btn secondary small picker-btn" onClick={openDatePicker}>
+                    📅 Calendar
+                  </button>
+                </div>
+                {date ? (
+                  <small className="picker-selected">Selected: {formatDateLabel(date)}</small>
+                ) : (
+                  <small className="picker-selected muted">📅 Calendar બટન દબાવો — તારીખ પસંદ કરો</small>
+                )}
               </label>
               <label>
                 સમય / Time *
-                <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
+                <div className="picker-row">
+                  <input
+                    ref={timeInputRef}
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    required
+                    className="time-input"
+                  />
+                  <button type="button" className="btn secondary small picker-btn" onClick={openTimePicker}>
+                    ⏰ Time
+                  </button>
+                </div>
               </label>
             </div>
 
@@ -307,9 +362,8 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
               ← Edit details
             </button>
             <p className="hint">
-              દરેક યજમાન માટે <strong>WhatsApp</strong> દબાવો — કાર્ડ image સાથે મોકલાશે.
-              (ફોન પર WhatsApp પસંદ કરો; કમ્પ્યુટર પર કાર્ડ save થશે અને WhatsApp ચેટ ખુલશે — image
-              attach કરીને Send.)
+              દરેક યજમાન માટે <strong>WhatsApp</strong> દબાવો — WhatsApp ચેટ સીધી ખુલશે (message તૈયાર).
+              કાર્ડ image પણ download થશે — ચેટમાં 📎 attach કરીને Send દબાવો.
             </p>
             {previewUrl && (
               <img src={previewUrl} alt="Invite card" className="invite-preview small" />
@@ -327,7 +381,7 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
                     <button
                       type="button"
                       className={`btn small ${sent ? 'secondary' : 'whatsapp'}`}
-                      onClick={() => void sendWhatsAppCard(person)}
+                      onClick={() => sendWhatsAppCard(person)}
                     >
                       {sent ? '✓ WhatsApp ફરી' : 'WhatsApp ➤'}
                     </button>

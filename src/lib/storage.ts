@@ -140,7 +140,9 @@ export function formatWhatsAppNumber(phone: string): string {
 }
 
 export function buildWhatsAppUrl(person: Person, message: string): string {
-  return `https://wa.me/${getWhatsAppNumber(person)}?text=${encodeURIComponent(message)}`;
+  const phone = getWhatsAppNumber(person);
+  // api.whatsapp.com opens WhatsApp app / Web more reliably than wa.me on desktop
+  return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
 }
 
 export function displayPhone(person: Person): string {
