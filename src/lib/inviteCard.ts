@@ -270,7 +270,7 @@ export function buildPoojaInviteMessage(details: InviteDetails): string {
     `📍 સ્થળ: ${details.place}`,
     details.notes?.trim() ? `📝 ${details.notes.trim()}` : '',
     '',
-    'કૃપા કરીને આમંત્રણ કાર્ડ (image) જોડીને મોકલેલ છે — અથવા WhatsApp માં attach કરો.',
+    'કૃપા કરીને આમંત્રણ કાર્ડ (image) જોડીને મોકલેલ છે / Please see the invitation card image.',
     '',
     '— Yoga Jyotish',
   ]

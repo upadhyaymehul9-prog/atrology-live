@@ -152,43 +152,50 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
     URL.revokeObjectURL(url);
   };
 
-  const shareImage = async (person: PersonWithYogas) => {
+  /** WhatsApp-only: share card image when possible, else download + open WhatsApp chat. */
+  const sendWhatsAppCard = async (person: PersonWithYogas) => {
     const details = detailsFor(person);
     if (!details) return;
-    const b = person.id === previewPerson?.id && blob ? blob : await generateInviteCard(details);
-    const file = new File([b], inviteFileName(details.yoga.id, person.name), { type: 'image/png' });
-    const message = buildPoojaInviteMessage(details);
+    setError('');
+    try {
+      const b = person.id === previewPerson?.id && blob ? blob : await generateInviteCard(details);
+      const file = new File([b], inviteFileName(details.yoga.id, person.name), {
+        type: 'image/png',
+      });
+      const message = buildPoojaInviteMessage(details);
 
-    if (navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: `Pooja invite — ${details.yoga.nameHi || details.yoga.name}`,
-          text: message,
-        });
-        setSentIds((prev) => new Set(prev).add(person.id));
-        return;
-      } catch {
-        // user cancelled or share failed — fall through
+      if (typeof navigator !== 'undefined' && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: `Pooja invite — ${details.yoga.nameHi || details.yoga.name}`,
+            text: message,
+          });
+          setSentIds((prev) => new Set(prev).add(person.id));
+          return;
+        } catch (err) {
+          if (err instanceof Error && err.name === 'AbortError') return;
+          // fall through to WhatsApp URL + download
+        }
       }
+
+      // Desktop / browsers that can't share files: save card, open WhatsApp chat
+      await downloadFor(person);
+      window.open(buildWhatsAppUrl(person, message), '_blank');
+      setSentIds((prev) => new Set(prev).add(person.id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     }
-
-    // Fallback: download image + open WhatsApp text
-    await downloadFor(person);
-    window.open(buildWhatsAppUrl(person, message), '_blank');
-    setSentIds((prev) => new Set(prev).add(person.id));
-  };
-
-  const whatsappTextOnly = (person: PersonWithYogas) => {
-    const details = detailsFor(person);
-    if (!details) return;
-    window.open(buildWhatsAppUrl(person, buildPoojaInviteMessage(details)), '_blank');
-    setSentIds((prev) => new Set(prev).add(person.id));
   };
 
   const goSend = () => {
     if (!canGenerate) {
       setError('તારીખ, સમય અને સ્થળ ભરો / Fill date, time and place');
+      return;
+    }
+    // Single yajmaan → send on WhatsApp immediately
+    if (persons.length === 1) {
+      void sendWhatsAppCard(persons[0]);
       return;
     }
     setStep('send');
@@ -206,7 +213,7 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
         </button>
         <h3>🙏 પૂજા / વિધિ આમંત્રણ</h3>
         <p className="hint">
-          દોષનું કાર્ડ બનાવો — તારીખ, સમય, સ્થળ ભરો — image + WhatsApp મોકલો
+          દોષ કાર્ડ બનાવો → તારીખ · સમય · સ્થળ ભરો → ફક્ત WhatsApp થી મોકલો
         </p>
 
         {step === 'form' ? (
@@ -287,8 +294,10 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
               <button type="button" className="btn secondary" onClick={onClose}>
                 Cancel
               </button>
-              <button type="submit" className="btn primary" disabled={!canGenerate || generating}>
-                આગળ · Send to {persons.length} Yajmaan
+              <button type="submit" className="btn whatsapp" disabled={!canGenerate || generating}>
+                {persons.length === 1
+                  ? 'WhatsApp પર મોકલો'
+                  : `આગળ · WhatsApp (${persons.length})`}
               </button>
             </div>
           </form>
@@ -298,12 +307,14 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
               ← Edit details
             </button>
             <p className="hint">
-              Mobile પર <strong>Share image</strong> WhatsApp માં image સાથે ખુલે છે. Desktop પર image
-              download થશે + WhatsApp text ખુલશે — image attach કરીને મોકલો.
+              દરેક યજમાન માટે <strong>WhatsApp</strong> દબાવો — કાર્ડ image સાથે મોકલાશે.
+              (ફોન પર WhatsApp પસંદ કરો; કમ્પ્યુટર પર કાર્ડ save થશે અને WhatsApp ચેટ ખુલશે — image
+              attach કરીને Send.)
             </p>
             {previewUrl && (
               <img src={previewUrl} alt="Invite card" className="invite-preview small" />
             )}
+            {error && <p className="error">{error}</p>}
             <ul className="bulk-send-list">
               {persons.map((person) => {
                 const sent = sentIds.has(person.id);
@@ -313,29 +324,13 @@ export function PoojaInviteModal({ persons, preferredYogaId, onClose }: PoojaInv
                       <strong>{person.name}</strong>
                       <span className="meta">📱 {displayPhone(person)}</span>
                     </div>
-                    <div className="invite-row-actions">
-                      <button
-                        type="button"
-                        className="btn secondary small"
-                        onClick={() => void downloadFor(person)}
-                      >
-                        ⬇ Image
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn small ${sent ? 'secondary' : 'whatsapp'}`}
-                        onClick={() => void shareImage(person)}
-                      >
-                        {sent ? '✓ Share again' : 'Share image'}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn secondary small"
-                        onClick={() => whatsappTextOnly(person)}
-                      >
-                        Text
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className={`btn small ${sent ? 'secondary' : 'whatsapp'}`}
+                      onClick={() => void sendWhatsAppCard(person)}
+                    >
+                      {sent ? '✓ WhatsApp ફરી' : 'WhatsApp ➤'}
+                    </button>
                   </li>
                 );
               })}
